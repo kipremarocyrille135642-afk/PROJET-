@@ -2,26 +2,96 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Inscription</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Sign Up - EduTrack</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #2563eb 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        body::before, body::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+        body::before { width: 400px; height: 400px; top: -150px; left: -150px; }
+        body::after { width: 300px; height: 300px; bottom: -100px; right: -100px; }
+        .panneau-gauche {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 3rem;
+            z-index: 1;
+        }
+        .marque {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-size: 1.6rem; font-weight: 800; margin-bottom: 2rem;
+        }
+        .panneau-gauche h2 { font-size: 2.2rem; margin-bottom: 0.5rem; text-align: center; }
+        .panneau-gauche p { opacity: 0.85; text-align: center; max-width: 350px; }
+        .icone-ecole { font-size: 5rem; margin-bottom: 1rem; }
+        .conteneur {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            width: 340px;
+            margin: auto 4rem auto 0;
+            z-index: 1;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 1.2rem; color: #1a1a1a; }
+        label { display: block; font-size: 0.85rem; margin-top: 0.9rem; margin-bottom: 0.3rem; color: #444; }
+        input {
+            width: 100%; padding: 0.7rem; border: 1px solid #d0d0d0;
+            border-radius: 8px; box-sizing: border-box; font-size: 0.95rem;
+        }
+        input:focus { outline: none; border-color: #4f46e5; }
+        button {
+            margin-top: 1.4rem; width: 100%; padding: 0.8rem;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white; border: none; border-radius: 8px;
+            font-size: 0.95rem; cursor: pointer; font-weight: 600;
+        }
+        button:hover { opacity: 0.9; }
+        .erreur { color: #dc2626; font-size: 0.85rem; }
+        a { color: #4f46e5; text-decoration: none; font-weight: 500; }
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            .conteneur { margin: 2rem auto; }
+        }
+    </style>
 </head>
 <body>
+<div class="panneau-gauche">
+    <div class="marque">🎓 EduTrack</div>
+    <div class="icone-ecole">📚</div>
+    <h2>Join us</h2>
+    <p>Create your account to access your student portal.</p>
+</div>
 <div class="conteneur">
-    <h1>Créer un compte</h1>
-
+    <h1>Create an account</h1>
     <p class="erreur" th:if="${erreur}" th:text="${erreur}"></p>
-
     <form th:action="@{/inscription}" method="post">
+        <label for="nom">Last name</label>
+        <input type="text" id="nom" name="nom" required>
+        <label for="prenom">First name</label>
+        <input type="text" id="prenom" name="prenom" required>
         <label for="email">Email</label>
         <input type="email" id="email" name="email" required>
-
-        <label for="motDePasse">Mot de passe (6 caractères min.)</label>
+        <label for="motDePasse">Password (min. 6 characters)</label>
         <input type="password" id="motDePasse" name="motDePasse" minlength="6" required>
-
-        <button type="submit">S'inscrire</button>
+        <button type="submit">Sign up</button>
     </form>
-
-    <p>Déjà un compte ? <a th:href="@{/login}">Se connecter</a></p>
+    <p style="margin-top:1rem; font-size:0.9rem;">Already have an account? <a th:href="@{/login}">Log in</a></p>
 </div>
 </body>
 </html>

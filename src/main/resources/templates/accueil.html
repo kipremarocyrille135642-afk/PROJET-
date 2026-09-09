@@ -2,17 +2,491 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Accueil</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Dashboard - EduTrack</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .enveloppe { display: flex; flex: 1; }
+        .barre-laterale {
+            width: 68px;
+            background: #1e3a5f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.2rem 0;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }
+        .barre-laterale .logo-mini { font-size: 1.6rem; margin-bottom: 1rem; }
+        .icone-nav {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: white; text-decoration: none;
+            position: relative;
+        }
+        .icone-nav:hover { background: rgba(212,175,55,0.2); }
+        .icone-nav.actif { background: #d4af37; }
+        .icone-nav .infobulle {
+            position: absolute; left: 56px; top: 50%; transform: translateY(-50%);
+            background: #1a1a1a; color: white; font-size: 0.75rem;
+            padding: 0.4rem 0.7rem; border-radius: 6px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.15s;
+            z-index: 10;
+        }
+        .icone-nav:hover .infobulle { opacity: 1; }
+        .icone-nav.deconnexion { margin-top: auto; }
+        .badge-notif {
+            position: absolute; top: 2px; right: 2px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #dc2626; border: 2px solid #1e3a5f;
+        }
+
+        .zone-principale { flex: 1; min-width: 0; }
+        .barre-haut {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .barre-haut h1 {
+            margin: 0; font-size: 1.2rem; font-family: Georgia, serif;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .barre-haut .droite { display: flex; align-items: center; gap: 1rem; position: relative; }
+        .photo-mini {
+            width: 38px; height: 38px; border-radius: 50%;
+            object-fit: cover; border: 2px solid #d4af37; cursor: pointer;
+        }
+        .photo-mini-vide {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(212,175,55,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer;
+        }
+        .menu-profil {
+            position: absolute; top: 52px; right: 0;
+            background: white; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 200px; overflow: hidden; display: none; z-index: 50;
+        }
+        .menu-profil.ouvert { display: block; }
+        .menu-profil a, .menu-profil button {
+            display: block; width: 100%; text-align: left; padding: 0.8rem 1.1rem;
+            font-size: 0.88rem; color: #1a1a1a; text-decoration: none; border: none;
+            background: white; cursor: pointer; font-family: inherit;
+            border-bottom: 1px solid #f0f1ed;
+        }
+        .menu-profil a:hover, .menu-profil button:hover { background: #f4f5f7; }
+        .menu-profil button.deco { color: #b91c1c; font-weight: 600; border-bottom: none; }
+
+        .banniere {
+            height: 200px;
+            background-size: cover;
+            background-position: center 30%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        .banniere h2 { margin: 0 0 0.3rem; font-size: 1.6rem; font-family: Georgia, serif; }
+        .banniere p { margin: 0; opacity: 0.9; font-size: 0.9rem; }
+
+        .contenu { max-width: 1000px; margin: -50px auto 0; padding: 0 1.5rem 1.5rem; position: relative; z-index: 1; }
+        .grille-cartes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .carte-stat {
+            background: white;
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 24px rgba(15,32,56,0.12);
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+        .carte-stat .icone-stat {
+            width: 42px; height: 42px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+            background: #eef2f7;
+        }
+        .carte-stat .valeur { font-size: 1.4rem; font-weight: 700; color: #1e3a5f; }
+        .carte-stat .libelle { font-size: 0.78rem; color: #6b7280; }
+        .grille-principale {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 750px) {
+            .grille-principale { grid-template-columns: 1fr; }
+        }
+        .panneau {
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #eef0ee;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06);
+        }
+        .panneau h2 {
+            margin: 0 0 1rem; font-size: 1rem; color: #1e3a5f;
+            font-family: Georgia, serif;
+        }
+        .anneau-conteneur { display: flex; flex-direction: column; align-items: center; }
+        .anneau {
+            width: 140px; height: 140px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .anneau-centre {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: white;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .anneau-centre .pourcentage { font-size: 1.5rem; font-weight: 700; color: #1e3a5f; }
+        .anneau-centre .texte { font-size: 0.7rem; color: #6b7280; }
+        .avertissement {
+            margin-top: 1rem; padding: 0.6rem 0.9rem;
+            background: #fef2f2; color: #b91c1c;
+            border-radius: 8px; font-size: 0.78rem; text-align: center;
+        }
+        .liens-rapides { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.5rem; }
+        .lien-rapide {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.7rem 0.9rem; border-radius: 8px;
+            text-decoration: none; color: #1e3a5f; font-size: 0.9rem; font-weight: 600;
+            border: 1px solid #eef0ee; background: #fafbfa;
+        }
+        .lien-rapide:hover { background: #eef2f7; }
+
+        .section-generique { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 1.5rem; }
+        .section-generique h2 {
+            font-size: 1.1rem; color: #1e3a5f; font-family: Georgia, serif;
+            margin-bottom: 1rem;
+        }
+
+        .selecteur-semestre { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .bouton-semestre {
+            padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #d8d8d3;
+            background: white; color: #1e3a5f; font-size: 0.82rem; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+        }
+        .bouton-semestre.actif { background: #1e3a5f; color: white; border-color: #1e3a5f; }
+        .bouton-semestre:hover { border-color: #1e3a5f; }
+        .carte-emploi {
+            background: white; border-radius: 10px; border: 1px solid #eef0ee;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06); overflow: hidden;
+        }
+        table.emploi { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+        table.emploi thead th {
+            background: #eef2f7; text-align: left;
+            padding: 0.7rem 1rem; color: #1e3a5f; font-weight: 700;
+        }
+        table.emploi tbody td { padding: 0.7rem 1rem; border-top: 1px solid #eef1f4; color: #333; }
+        table.emploi tbody tr:hover { background: #f8fafc; }
+        .badge-jour {
+            display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
+            background: #eef2f7; color: #1e3a5f; font-size: 0.75rem; font-weight: 700;
+        }
+        .vide-emploi { padding: 2rem; text-align: center; color: #888; font-size: 0.88rem; }
+
+        .section-profs { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+        .section-profs h2 {
+            font-size: 1.1rem; color: #1e3a5f; font-family: Georgia, serif;
+            margin-bottom: 1rem;
+        }
+        .carrousel-conteneur {
+            overflow: hidden;
+            border-radius: 10px;
+            border: 1px solid #eef0ee;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06);
+            padding: 1.2rem 0;
+        }
+        .carrousel-piste {
+            display: flex;
+            gap: 1.2rem;
+            animation: defilement 25s linear infinite;
+            width: max-content;
+        }
+        .carrousel-conteneur:hover .carrousel-piste { animation-play-state: paused; }
+        @keyframes defilement {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .carte-prof {
+            width: 170px; flex-shrink: 0; text-align: center;
+            padding: 0 1rem;
+        }
+        .carte-prof img {
+            width: 84px; height: 84px; border-radius: 50%;
+            object-fit: cover; border: 3px solid #d4af37; margin-bottom: 0.6rem;
+        }
+        .carte-prof .nom-prof { font-weight: 700; font-size: 0.88rem; color: #1a1a1a; }
+        .carte-prof .specialite-prof { font-size: 0.75rem; color: #888; margin-top: 0.2rem; }
+
+        .fond-popup {
+            position: fixed; inset: 0; background: rgba(15,32,56,0.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; padding: 1rem;
+        }
+        .popup {
+            background: white; border-radius: 12px; width: 100%; max-width: 440px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;
+        }
+        .popup-entete {
+            background: #1e3a5f; color: white; padding: 1.1rem 1.4rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .popup-entete h3 { margin: 0; font-size: 1.05rem; font-family: Georgia, serif; }
+        .popup-fermer {
+            background: none; border: none; color: white; font-size: 1.2rem;
+            cursor: pointer; opacity: 0.8;
+        }
+        .popup-fermer:hover { opacity: 1; }
+        .popup-corps { padding: 1.4rem; }
+        .popup-ligne {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.6rem 0; border-bottom: 1px solid #f0f1ed; font-size: 0.9rem;
+        }
+        .popup-ligne:last-child { border-bottom: none; }
+        .popup-ligne .libelle-popup { color: #666; }
+        .popup-ligne .valeur-popup { font-weight: 700; color: #1e3a5f; }
+        .popup-alerte {
+            background: #fef2f2; color: #b91c1c; padding: 0.7rem 0.9rem;
+            border-radius: 8px; font-size: 0.82rem; margin-top: 0.8rem;
+        }
+        .popup-annonce {
+            background: #eef2f7; padding: 0.8rem 0.9rem; border-radius: 8px;
+            font-size: 0.85rem; color: #333; margin-top: 1rem;
+        }
+
+        .pied-page {
+            background: #14263f; color: rgba(255,255,255,0.75);
+            padding: 2rem; text-align: center; font-size: 0.82rem;
+        }
+        .pied-page .liens-pied { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+        .pied-page a { color: #d4af37; text-decoration: none; }
+        .pied-page a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-<div class="conteneur">
-    <h1>Bienvenue !</h1>
-    <p>Vous êtes connecté en tant que : <strong th:text="${email}"></strong></p>
 
-    <form th:action="@{/deconnexion}" method="post">
-        <button type="submit">Se déconnecter</button>
-    </form>
+<div class="fond-popup" id="fondPopup">
+    <div class="popup">
+        <div class="popup-entete">
+            <h3>👋 Welcome to EduTrack</h3>
+            <button class="popup-fermer" onclick="document.getElementById('fondPopup').style.display='none'">✕</button>
+        </div>
+        <div class="popup-corps">
+            <div class="popup-ligne">
+                <span class="libelle-popup">Current CGPA</span>
+                <span class="valeur-popup" th:text="${cgpa} + ' / 10'"></span>
+            </div>
+            <div class="popup-ligne">
+                <span class="libelle-popup">Attendance</span>
+                <span class="valeur-popup" th:text="${pourcentagePresence} + '%'"></span>
+            </div>
+            <div class="popup-ligne" th:if="${derniereNote != null}">
+                <span class="libelle-popup">Latest grade added</span>
+                <span class="valeur-popup" th:text="${derniereNote.matiere.nom} + ': ' + ${derniereNote.valeur} + '/20'"></span>
+            </div>
+            <p class="popup-alerte" th:if="${pourcentagePresence < 80 and pourcentagePresence > 0}">
+                ⚠️ Your attendance is below 80%.
+            </p>
+            <div class="popup-annonce" th:each="annonce : ${annonces}">
+                📢 <span th:text="${annonce.contenu}"></span>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div class="enveloppe">
+    <div class="barre-laterale">
+        <div class="logo-mini">🎓</div>
+        <a th:href="@{/accueil}" class="icone-nav actif">🏠<span class="infobulle">Home</span></a>
+        <a th:href="@{/mes-notes}" class="icone-nav">
+            📊<span class="infobulle">My Grades</span>
+            <span th:if="${notificationRecente}" class="badge-notif"></span>
+        </a>
+        <a th:href="@{/profil}" class="icone-nav">👤<span class="infobulle">My Profile</span></a>
+        <a th:if="${estAdmin}" th:href="@{/admin/notes}" class="icone-nav">🔐<span class="infobulle">Admin Panel</span></a>
+        <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
+            <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
+                🚪<span class="infobulle">Log out</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="zone-principale">
+        <div class="barre-haut">
+            <h1>🎓 EduTrack</h1>
+            <div class="droite">
+                <span th:text="${email}"></span>
+                <img th:if="${utilisateur.photoBase64 != null}" th:src="${utilisateur.photoBase64}" class="photo-mini" onclick="document.getElementById('menuProfil').classList.toggle('ouvert')">
+                <div th:if="${utilisateur.photoBase64 == null}" class="photo-mini-vide" onclick="document.getElementById('menuProfil').classList.toggle('ouvert')">👤</div>
+                <div class="menu-profil" id="menuProfil">
+                    <a th:href="@{/profil}">👤 My Profile</a>
+                    <a th:href="@{/mes-notes}">📊 My Grades</a>
+                    <form th:action="@{/deconnexion}" method="post" style="margin:0;">
+                        <button type="submit" class="deco">🚪 Log out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="banniere" th:style="'background-image: linear-gradient(rgba(15,32,56,0.55), rgba(15,32,56,0.7)), url(' + ${photoBanniere} + ')'">
+            <h2 th:text="'Welcome, ' + ${utilisateur.prenom} + '!'"></h2>
+            <p>Here's an overview of your academic progress</p>
+        </div>
+        <div class="contenu">
+            <div class="grille-cartes">
+                <div class="carte-stat">
+                    <div class="icone-stat">📈</div>
+                    <div>
+                        <div class="valeur" th:text="${cgpa}"></div>
+                        <div class="libelle">CGPA (out of 10)</div>
+                    </div>
+                </div>
+                <div class="carte-stat">
+                    <div class="icone-stat">📚</div>
+                    <div>
+                        <div class="valeur" th:text="${#maps.size(sgpaParSemestre)}"></div>
+                        <div class="libelle">Semesters tracked</div>
+                    </div>
+                </div>
+                <div class="carte-stat">
+                    <div class="icone-stat">🗓️</div>
+                    <div>
+                        <div class="valeur" th:text="${pourcentagePresence} + '%'"></div>
+                        <div class="libelle">Attendance</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grille-principale">
+                <div class="panneau">
+                    <h2>Results by semester</h2>
+                    <canvas id="graphiqueResultats" height="110"></canvas>
+                </div>
+                <div class="panneau">
+                    <h2>Attendance</h2>
+                    <div class="anneau-conteneur">
+                        <div class="anneau" th:style="'background: conic-gradient(#1e3a5f ' + ${pourcentagePresence} + '%, #eef0ee 0)'">
+                            <div class="anneau-centre">
+                                <div class="pourcentage" th:text="${pourcentagePresence} + '%'"></div>
+                                <div class="texte">Attendance</div>
+                            </div>
+                        </div>
+                        <p class="avertissement" th:if="${pourcentagePresence < 80 and pourcentagePresence > 0}">
+                            ⚠️ Attendance below 80%
+                        </p>
+                    </div>
+                    <div class="liens-rapides">
+                        <a th:href="@{/mes-notes}" class="lien-rapide">📊 View my grades</a>
+                        <a th:href="@{/profil}" class="lien-rapide">👤 My profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-generique">
+            <h2>🗓️ Class Schedule</h2>
+            <div class="selecteur-semestre">
+                <a th:each="s : ${semestres}"
+                   th:href="@{/accueil(semestre=${s})}"
+                   th:text="'Semester ' + ${s}"
+                   th:class="${s == semestreActuel} ? 'bouton-semestre actif' : 'bouton-semestre'"></a>
+            </div>
+            <div class="carte-emploi">
+                <table class="emploi" th:if="${not #lists.isEmpty(seances)}">
+                    <thead>
+                    <tr><th>Day</th><th>Time</th><th>Subject</th><th>Room</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="seance : ${seances}">
+                        <td><span class="badge-jour" th:text="${seance.jour}"></span></td>
+                        <td th:text="${seance.heureDebut} + ' - ' + ${seance.heureFin}"></td>
+                        <td th:text="${seance.matiere.nom}"></td>
+                        <td th:text="${seance.salle}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="vide-emploi" th:if="${#lists.isEmpty(seances)}">
+                    No classes scheduled for this semester.
+                </div>
+            </div>
+        </div>
+
+        <div class="section-profs">
+            <h2>👨‍🏫 Our Faculty</h2>
+            <div class="carrousel-conteneur">
+                <div class="carrousel-piste">
+                    <div class="carte-prof" th:each="prof : ${professeurs}">
+                        <img th:src="${prof.photoUrl}" alt="Teacher photo">
+                        <div class="nom-prof" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
+                        <div class="specialite-prof" th:text="${prof.specialite}"></div>
+                    </div>
+                    <div class="carte-prof" th:each="prof : ${professeurs}">
+                        <img th:src="${prof.photoUrl}" alt="Teacher photo">
+                        <div class="nom-prof" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
+                        <div class="specialite-prof" th:text="${prof.specialite}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pied-page">
+    <div class="liens-pied">
+        <a th:href="@{/accueil}">Home</a>
+        <a th:href="@{/mes-notes}">My Grades</a>
+        <a th:href="@{/profil}">My Profile</a>
+    </div>
+    <p>🎓 EduTrack — Academic Tracking Platform · contact@edutrack.demo</p>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var sgpaData = /*[[${sgpaParSemestre}]]*/ {};
+    /*]]>*/
+    var labels = Object.keys(sgpaData).map(function(s) { return "Semester " + s; });
+    var valeurs = Object.values(sgpaData);
+    new Chart(document.getElementById('graphiqueResultats'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'SGPA (out of 10)',
+                data: valeurs,
+                backgroundColor: '#1e3a5f',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true, max: 10 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('menuProfil');
+        if (!e.target.closest('.droite')) {
+            menu.classList.remove('ouvert');
+        }
+    });
+</script>
 </body>
 </html>

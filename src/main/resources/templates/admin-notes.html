@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - EduTrack</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: #f0f1ed;
+            padding: 0 0 3rem;
+        }
+        .barre-haut {
+            background: #1e3a5f;
+            padding: 1.1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        .barre-haut .titre {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-weight: 700; font-size: 1.15rem; font-family: Georgia, serif;
+        }
+        .barre-haut .droite { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; }
+        .barre-haut .droite span { opacity: 0.85; }
+        .btn-deconnexion {
+            background: rgba(220,38,38,0.15); color: #fca5a5; border: 1px solid rgba(220,38,38,0.3);
+            padding: 0.5rem 1rem; border-radius: 3px; font-size: 0.82rem; cursor: pointer; font-weight: 700;
+        }
+        .btn-deconnexion:hover { background: rgba(220,38,38,0.25); }
+
+        .page { width: 100%; max-width: 1150px; margin: 0 auto; padding: 0 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+        .stats-rapides {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .carte-stat-admin {
+            background: white; border-radius: 4px; border-top: 3px solid #d4af37;
+            padding: 1.2rem 1.5rem; box-shadow: 0 2px 8px rgba(15,32,56,0.08);
+        }
+        .carte-stat-admin .valeur-admin { font-size: 1.7rem; font-weight: 700; color: #1e3a5f; }
+        .carte-stat-admin .libelle-admin { font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem; }
+
+        .carte {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(15,32,56,0.08);
+            overflow: hidden;
+            border-top: 3px solid #d4af37;
+        }
+        .entete {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.3rem 2rem;
+        }
+        .entete h1 { margin: 0; font-size: 1.1rem; font-family: Georgia, serif; font-weight: 700; }
+
+        .corps { padding: 1.2rem 2rem 1.5rem; }
+        .info { color: #15803d; font-size: 0.85rem; margin-bottom: 1rem; }
+        .erreur { color: #b91c1c; font-size: 0.85rem; margin-bottom: 1rem; }
+
+        input.recherche {
+            width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #d8d8d3;
+            border-radius: 3px; font-size: 0.88rem; margin-bottom: 0.8rem;
+            box-sizing: border-box;
+        }
+        input.recherche:focus { outline: none; border-color: #1e3a5f; }
+
+        label {
+            display: block; margin-top: 0.9rem; font-size: 0.8rem; color: #444;
+            text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+        }
+        select, input[type="number"], input[type="text"] {
+            width: 100%; padding: 0.7rem; border: 1px solid #d8d8d3;
+            border-radius: 3px; box-sizing: border-box; font-size: 0.95rem;
+            margin-top: 0.35rem;
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        select:focus, input:focus { outline: none; border-color: #1e3a5f; }
+        button.submit {
+            margin-top: 1.4rem; width: 100%; padding: 0.8rem;
+            background: #1e3a5f;
+            color: white; border: none; border-radius: 3px;
+            font-size: 0.9rem; cursor: pointer; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        button.submit:hover { background: #14263f; }
+
+        .listes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 800px) {
+            .listes { grid-template-columns: 1fr; }
+        }
+
+        .tableau-scroll {
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 3px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead th {
+            position: sticky; top: 0;
+            background: #eef2f7; text-align: left;
+            padding: 0.6rem 0.7rem; color: #1e3a5f; font-weight: 700;
+        }
+        tbody td { padding: 0.5rem 0.7rem; border-top: 1px solid #eef1f4; color: #333; vertical-align: middle; }
+        tbody tr:hover { background: #f8fafc; }
+        .badge {
+            display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px;
+            background: #eef2f7; color: #1e3a5f; font-size: 0.72rem; font-weight: 700;
+            border: 1px solid #d4af37;
+        }
+        .rang {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #eef2f7; color: #1e3a5f; font-weight: 700; font-size: 0.78rem;
+            margin-right: 0.5rem;
+        }
+        .rang.or { background: #fef3c7; color: #92400e; }
+        .rang.argent { background: #e5e7eb; color: #374151; }
+        .rang.bronze { background: #fed7aa; color: #9a3412; }
+
+        .ligne-actions { display: flex; gap: 0.4rem; }
+        .btn-petit {
+            padding: 0.35rem 0.6rem; border-radius: 3px; border: none;
+            font-size: 0.75rem; cursor: pointer; font-weight: 700;
+        }
+        .btn-modifier { background: #eef2f7; color: #1e3a5f; }
+        .btn-modifier:hover { background: #dce4ee; }
+        .btn-supprimer { background: #fee2e2; color: #b91c1c; }
+        .btn-supprimer:hover { background: #fecaca; }
+        .form-note-inline input { width: 60px; padding: 0.3rem; font-size: 0.78rem; margin: 0; display: inline-block; }
+        .form-note-inline input[type="text"] { width: 100px; }
+        .form-note-inline { display: flex; gap: 0.3rem; align-items: center; }
+    </style>
+</head>
+<body>
+
+<div class="barre-haut">
+    <div class="titre">🎓 EduTrack — Admin Panel</div>
+    <div class="droite">
+        <span th:text="${email}"></span>
+        <form th:action="@{/deconnexion}" method="post" style="margin:0;">
+            <button type="submit" class="btn-deconnexion">Log out</button>
+        </form>
+    </div>
+</div>
+
+<div class="page">
+
+    <p class="info" th:if="${succesMessage}" th:text="${succesMessage}"></p>
+    <p class="erreur" th:if="${erreur}" th:text="${erreur}"></p>
+
+    <div class="stats-rapides">
+        <div class="carte-stat-admin">
+            <div class="valeur-admin" th:text="${moyenneClasse} + ' / 20'"></div>
+            <div class="libelle-admin">Class average</div>
+        </div>
+        <div class="carte-stat-admin">
+            <div class="valeur-admin" th:text="${#lists.size(eleves)}"></div>
+            <div class="libelle-admin">Enrolled students</div>
+        </div>
+        <div class="carte-stat-admin">
+            <div class="valeur-admin" th:text="${#lists.size(notes)}"></div>
+            <div class="libelle-admin">Grades recorded</div>
+        </div>
+    </div>
+
+    <div class="carte">
+        <div class="entete"><h1>🏆 Top 5 Students</h1></div>
+        <div class="corps">
+            <div class="tableau-scroll" style="max-height: none;">
+                <table>
+                    <thead>
+                    <tr><th>Rank</th><th>Student</th><th>Average</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entree, iter : ${topEleves}">
+                        <td>
+                            <span class="rang" th:classappend="${iter.index == 0} ? 'or' : (${iter.index == 1} ? 'argent' : (${iter.index == 2} ? 'bronze' : ''))"
+                                  th:text="${iter.index + 1}"></span>
+                        </td>
+                        <td th:text="${entree.key.prenom} + ' ' + ${entree.key.nom}"></td>
+                        <td th:text="${#numbers.formatDecimal(entree.value, 1, 2)} + ' / 20'"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(topEleves)}">
+                        <td colspan="3">No grades recorded yet.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="listes">
+        <div class="carte">
+            <div class="entete"><h1>👥 Students (<span th:text="${#lists.size(eleves)}"></span>)</h1></div>
+            <div class="corps">
+                <input type="text" class="recherche" placeholder="Search a student..." onkeyup="filtrer(this, 'table-eleves')">
+                <div class="tableau-scroll">
+                    <table id="table-eleves">
+                        <thead>
+                        <tr><th>Last name</th><th>First name</th><th>Email</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="eleve : ${eleves}">
+                            <td th:text="${eleve.nom}"></td>
+                            <td th:text="${eleve.prenom}"></td>
+                            <td th:text="${eleve.email}"></td>
+                            <td>
+                                <form th:if="${eleve.role != 'ROLE_ADMIN'}"
+                                      th:action="@{'/admin/eleves/' + ${eleve.id} + '/supprimer'}"
+                                      method="post" style="margin:0;"
+                                      onsubmit="return confirm('Delete this student and all their grades?');">
+                                    <button type="submit" class="btn-petit btn-supprimer">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="carte">
+            <div class="entete"><h1>📚 Subjects (<span th:text="${#lists.size(matieres)}"></span>)</h1></div>
+            <div class="corps">
+                <input type="text" class="recherche" placeholder="Search a subject..." onkeyup="filtrer(this, 'table-matieres')">
+                <div class="tableau-scroll">
+                    <table id="table-matieres">
+                        <thead>
+                        <tr><th>Name</th><th>Semester</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="matiere : ${matieres}">
+                            <td th:text="${matiere.nom}"></td>
+                            <td><span class="badge" th:text="'S' + ${matiere.semestre}"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="carte">
+        <div class="entete"><h1>📊 Recorded Grades (<span th:text="${#lists.size(notes)}"></span>)</h1></div>
+        <div class="corps">
+            <input type="text" class="recherche" placeholder="Search a grade (student, subject)..." onkeyup="filtrer(this, 'table-notes')">
+            <div class="tableau-scroll">
+                <table id="table-notes">
+                    <thead>
+                    <tr><th>Student</th><th>Subject</th><th>Type</th><th>Grade</th><th>Date</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="note : ${notes}">
+                        <td th:text="${note.eleve.email}"></td>
+                        <td th:text="${note.matiere.nom}"></td>
+                        <td th:text="${note.typeExamen}"></td>
+                        <td th:text="${note.valeur}"></td>
+                        <td th:text="${note.date}"></td>
+                        <td>
+                            <div class="ligne-actions">
+                                <form th:action="@{'/admin/notes/' + ${note.id} + '/modifier'}" method="post" class="form-note-inline">
+                                    <input type="number" name="valeur" th:value="${note.valeur}" min="0" max="20" step="0.5" required>
+                                    <input type="text" name="typeExamen" th:value="${note.typeExamen}" required>
+                                    <button type="submit" class="btn-petit btn-modifier">Update</button>
+                                </form>
+                                <form th:action="@{'/admin/notes/' + ${note.id} + '/supprimer'}" method="post" style="margin:0;"
+                                      onsubmit="return confirm('Delete this grade?');">
+                                    <button type="submit" class="btn-petit btn-supprimer">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="carte" style="max-width: 480px; margin: 0 auto; width: 100%;">
+        <div class="entete">
+            <h1>📝 Add a Grade</h1>
+        </div>
+        <div class="corps">
+            <p class="info" th:if="${param.succes}">Grade added successfully!</p>
+            <form th:action="@{/admin/notes}" method="post">
+                <label for="eleveId">Student</label>
+                <select id="eleveId" name="eleveId" required>
+                    <option value="" disabled selected>-- Select a student --</option>
+                    <option th:each="eleve : ${eleves}"
+                            th:value="${eleve.id}"
+                            th:text="${eleve.email}"></option>
+                </select>
+                <label for="matiereId">Subject</label>
+                <select id="matiereId" name="matiereId" required>
+                    <option value="" disabled selected>-- Select a subject --</option>
+                    <option th:each="matiere : ${matieres}"
+                            th:value="${matiere.id}"
+                            th:text="${matiere.nom}"></option>
+                </select>
+                <label for="typeExamen">Exam type</label>
+                <input type="text" id="typeExamen" name="typeExamen" placeholder="E.g.: Quiz 1, Final exam..." required>
+                <label for="valeur">Grade (out of 20)</label>
+                <input type="number" id="valeur" name="valeur" min="0" max="20" step="0.5" required>
+                <button type="submit" class="submit">Add grade</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function filtrer(champ, idTable) {
+        var texte = champ.value.toLowerCase();
+        var table = document.getElementById(idTable);
+        var lignes = table.getElementsByTagName('tr');
+        for (var i = 1; i < lignes.length; i++) {
+            var contenu = lignes[i].textContent.toLowerCase();
+            lignes[i].style.display = contenu.indexOf(texte) > -1 ? '' : 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

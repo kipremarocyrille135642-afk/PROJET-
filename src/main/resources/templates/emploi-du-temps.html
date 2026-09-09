@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Emploi du temps - EduTrack</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+        }
+        .barre-laterale {
+            width: 68px;
+            background: #1e3a5f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.2rem 0;
+            gap: 0.6rem;
+            flex-shrink: 0;
+            min-height: 100vh;
+        }
+        .barre-laterale .logo-mini { font-size: 1.6rem; margin-bottom: 1rem; }
+        .icone-nav {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: white; text-decoration: none;
+            position: relative;
+        }
+        .icone-nav:hover { background: rgba(212,175,55,0.2); }
+        .icone-nav.actif { background: #d4af37; }
+        .icone-nav .infobulle {
+            position: absolute; left: 56px; top: 50%; transform: translateY(-50%);
+            background: #1a1a1a; color: white; font-size: 0.75rem;
+            padding: 0.4rem 0.7rem; border-radius: 6px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.15s;
+            z-index: 10;
+        }
+        .icone-nav:hover .infobulle { opacity: 1; }
+        .icone-nav.deconnexion { margin-top: auto; }
+
+        .zone-principale { flex: 1; min-width: 0; }
+        .barre-haut {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .barre-haut h1 {
+            margin: 0; font-size: 1.2rem; font-family: Georgia, serif;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        .contenu { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+
+        .selecteur-semestre { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .bouton-semestre {
+            padding: 0.6rem 1.1rem; border-radius: 6px; border: 1px solid #d8d8d3;
+            background: white; color: #1e3a5f; font-size: 0.85rem; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+        }
+        .bouton-semestre.actif { background: #1e3a5f; color: white; border-color: #1e3a5f; }
+        .bouton-semestre:hover { border-color: #1e3a5f; }
+
+        .carte {
+            background: white; border-radius: 10px; border: 1px solid #eef0ee;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06); overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        thead th {
+            background: #eef2f7; text-align: left;
+            padding: 0.8rem 1rem; color: #1e3a5f; font-weight: 700;
+        }
+        tbody td { padding: 0.8rem 1rem; border-top: 1px solid #eef1f4; color: #333; }
+        tbody tr:hover { background: #f8fafc; }
+        .badge-jour {
+            display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px;
+            background: #eef2f7; color: #1e3a5f; font-size: 0.78rem; font-weight: 700;
+        }
+        .vide { padding: 3rem; text-align: center; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="barre-laterale">
+    <div class="logo-mini">🎓</div>
+    <a th:href="@{/accueil}" class="icone-nav">🏠<span class="infobulle">Accueil</span></a>
+    <a th:href="@{/mes-notes}" class="icone-nav">📊<span class="infobulle">Mes notes</span></a>
+    <a th:href="@{/emploi-du-temps}" class="icone-nav actif">🗓️<span class="infobulle">Emploi du temps</span></a>
+    <a th:href="@{/profil}" class="icone-nav">👤<span class="infobulle">Mon profil</span></a>
+    <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
+        <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
+            🚪<span class="infobulle">Se déconnecter</span>
+        </button>
+    </form>
+</div>
+
+<div class="zone-principale">
+    <div class="barre-haut">
+        <h1>🎓 EduTrack — Emploi du temps</h1>
+    </div>
+    <div class="contenu">
+        <div class="selecteur-semestre">
+            <a th:each="s : ${semestres}"
+               th:href="@{/emploi-du-temps(semestre=${s})}"
+               th:text="'Semestre ' + ${s}"
+               th:class="${s == semestreActuel} ? 'bouton-semestre actif' : 'bouton-semestre'"></a>
+        </div>
+
+        <div class="carte">
+            <table th:if="${not #lists.isEmpty(seances)}">
+                <thead>
+                <tr><th>Jour</th><th>Horaire</th><th>Matière</th><th>Salle</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="seance : ${seances}">
+                    <td><span class="badge-jour" th:text="${seance.jour}"></span></td>
+                    <td th:text="${seance.heureDebut} + ' - ' + ${seance.heureFin}"></td>
+                    <td th:text="${seance.matiere.nom}"></td>
+                    <td th:text="${seance.salle}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="vide" th:if="${#lists.isEmpty(seances)}">
+                Aucune séance programmée pour ce semestre.
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>EduTrack — Online Academic Management Platform</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0; color: #1a1a1a;
+        }
+        .nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.2rem 3rem; position: sticky; top: 0; background: white;
+            box-shadow: 0 2px 12px rgba(15,32,56,0.06); z-index: 10;
+        }
+        .nav .marque {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1.3rem; font-weight: 800; color: #1e3a5f;
+        }
+        .nav .actions a { text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-left: 1.5rem; }
+        .nav .actions a.connexion { color: #1e3a5f; }
+        .nav .actions a.inscription {
+            background: #1e3a5f; color: white; padding: 0.6rem 1.3rem; border-radius: 8px;
+        }
+        .nav .actions a.inscription:hover { background: #14263f; }
+
+        .hero {
+            position: relative; min-height: 560px; display: flex; align-items: center;
+            padding: 0 3rem;
+        }
+        .hero::before {
+            content: "";
+            position: absolute; inset: 0;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.85) 40%, rgba(255,255,255,0.25) 80%),
+                url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover; background-position: center;
+            z-index: -1;
+        }
+        .hero-contenu { max-width: 560px; }
+        .hero h1 { font-size: 3rem; line-height: 1.15; margin: 0 0 1.2rem; font-weight: 800; }
+        .hero h1 span { color: #1e3a5f; }
+        .hero p { font-size: 1.1rem; color: #444; margin-bottom: 2rem; max-width: 480px; }
+        .hero .cta {
+            display: inline-block; background: #1e3a5f; color: white; text-decoration: none;
+            padding: 0.9rem 2rem; border-radius: 8px; font-weight: 700; font-size: 1rem;
+        }
+        .hero .cta:hover { background: #14263f; }
+
+        .section {
+            max-width: 1100px; margin: 0 auto; padding: 4rem 2rem;
+        }
+        .section-titre { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.6rem; }
+        .section-sous-titre { text-align: center; color: #666; margin-bottom: 3rem; font-size: 1rem; }
+
+        .grille-fonctionnalites {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem;
+        }
+        .fonctionnalite {
+            text-align: center; padding: 1.5rem;
+        }
+        .fonctionnalite .icone {
+            width: 64px; height: 64px; border-radius: 16px; background: #eef2f7;
+            display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+            margin: 0 auto 1.2rem;
+        }
+        .fonctionnalite h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .fonctionnalite p { color: #666; font-size: 0.92rem; line-height: 1.5; }
+
+        .section-alt { background: #f7f8f6; }
+
+        .stats-section {
+            display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap; text-align: center;
+        }
+        .stats-section .chiffre { font-size: 2.5rem; font-weight: 800; color: #1e3a5f; font-family: Georgia, serif; }
+        .stats-section .libelle { color: #666; font-size: 0.9rem; margin-top: 0.3rem; }
+
+        .cta-final {
+            background: #1e3a5f; color: white; text-align: center; padding: 4rem 2rem;
+        }
+        .cta-final h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+        .cta-final p { opacity: 0.85; margin-bottom: 2rem; }
+        .cta-final a {
+            display: inline-block; background: #d4af37; color: #1a1a1a; text-decoration: none;
+            padding: 0.9rem 2.2rem; border-radius: 8px; font-weight: 700;
+        }
+        .cta-final a:hover { opacity: 0.9; }
+
+        .pied-page {
+            background: #14263f; color: rgba(255,255,255,0.7); text-align: center; padding: 2rem; font-size: 0.85rem;
+        }
+
+        @media (max-width: 700px) {
+            .nav { padding: 1rem 1.5rem; }
+            .hero { padding: 0 1.5rem; }
+            .hero h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav">
+    <div class="marque">🎓 EduTrack</div>
+    <div class="actions">
+        <a th:href="@{/login}" class="connexion">Log in</a>
+        <a th:href="@{/inscription}" class="inscription">Sign up</a>
+    </div>
+</div>
+
+<div class="hero">
+    <div class="hero-contenu">
+        <h1>Your academic success, <span>simply tracked.</span></h1>
+        <p>EduTrack brings together grades, schedules, attendance and academic progress in one clean, secure platform for students and administrators.</p>
+        <a th:href="@{/inscription}" class="cta">Get started — it's free</a>
+    </div>
+</div>
+
+<div class="section">
+    <h2 class="section-titre">Everything you need, in one place</h2>
+    <p class="section-sous-titre">A modern academic platform built for students and staff alike.</p>
+    <div class="grille-fonctionnalites">
+        <div class="fonctionnalite">
+            <div class="icone">📊</div>
+            <h3>Real-time grades</h3>
+            <p>Access your grades as soon as they're recorded, with detailed breakdowns by subject and semester.</p>
+        </div>
+        <div class="fonctionnalite">
+            <div class="icone">📈</div>
+            <h3>Progress tracking</h3>
+            <p>Visualize your CGPA and semester performance through clear, interactive charts.</p>
+        </div>
+        <div class="fonctionnalite">
+            <div class="icone">🗓️</div>
+            <h3>Class schedule</h3>
+            <p>Check your weekly timetable by semester, including rooms and class times.</p>
+        </div>
+        <div class="fonctionnalite">
+            <div class="icone">🔒</div>
+            <h3>Secure access</h3>
+            <p>Your data is protected with encrypted passwords and role-based access control.</p>
+        </div>
+        <div class="fonctionnalite">
+            <div class="icone">📄</div>
+            <h3>PDF grade reports</h3>
+            <p>Download a professional summary of your grades anytime, ready to share or print.</p>
+        </div>
+        <div class="fonctionnalite">
+            <div class="icone">👨‍🏫</div>
+            <h3>Faculty directory</h3>
+            <p>Get to know the teaching staff behind your courses at a glance.</p>
+        </div>
+    </div>
+</div>
+
+<div class="section section-alt">
+    <div class="stats-section">
+        <div>
+            <div class="chiffre">30+</div>
+            <div class="libelle">Courses tracked</div>
+        </div>
+        <div>
+            <div class="chiffre">6</div>
+            <div class="libelle">Semesters covered</div>
+        </div>
+        <div>
+            <div class="chiffre">100%</div>
+            <div class="libelle">Secure & reliable</div>
+        </div>
+    </div>
+</div>
+
+<div class="cta-final">
+    <h2>Ready to take control of your academic journey?</h2>
+    <p>Join EduTrack today and stay on top of your grades, schedule, and progress.</p>
+    <a th:href="@{/inscription}">Create your free account</a>
+</div>
+
+<div class="pied-page">
+    🎓 EduTrack — Online Academic Management Platform · contact@edutrack.demo
+</div>
+
+</body>
+</html>

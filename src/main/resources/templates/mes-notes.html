@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Grades - EduTrack</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+        }
+        .barre-laterale {
+            width: 68px;
+            background: #1e3a5f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.2rem 0;
+            gap: 0.6rem;
+            flex-shrink: 0;
+            min-height: 100vh;
+        }
+        .barre-laterale .logo-mini { font-size: 1.6rem; margin-bottom: 1rem; }
+        .icone-nav {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: white; text-decoration: none;
+            position: relative;
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+        .icone-nav:hover { background: rgba(212,175,55,0.2); transform: scale(1.06); }
+        .icone-nav.actif { background: #d4af37; }
+        .icone-nav .infobulle {
+            position: absolute; left: 56px; top: 50%; transform: translateY(-50%);
+            background: #1a1a1a; color: white; font-size: 0.75rem;
+            padding: 0.4rem 0.7rem; border-radius: 6px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.15s;
+            z-index: 10;
+        }
+        .icone-nav:hover .infobulle { opacity: 1; }
+        .icone-nav.deconnexion { margin-top: auto; }
+
+        .zone-principale { flex: 1; min-width: 0; }
+        .barre-haut {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .barre-haut h1 {
+            margin: 0; font-size: 1.2rem; font-family: Georgia, serif;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .barre-haut .btn-pdf {
+            background: rgba(212,175,55,0.15); color: #d4af37; border: 1px solid rgba(212,175,55,0.4);
+            padding: 0.6rem 1.1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700;
+            text-decoration: none; display: flex; align-items: center; gap: 0.4rem;
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+        .barre-haut .btn-pdf:hover { background: rgba(212,175,55,0.25); transform: translateY(-1px); }
+
+        .contenu { max-width: 950px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+
+        @keyframes entree {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .anime { animation: entree 0.5s ease both; }
+        .anime.d1 { animation-delay: 0.05s; }
+        .anime.d2 { animation-delay: 0.15s; }
+        .anime.d3 { animation-delay: 0.25s; }
+        .anime.d4 { animation-delay: 0.35s; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-carte {
+            background: white; border-radius: 10px; border-top: 3px solid #d4af37;
+            padding: 1.2rem 1.5rem; box-shadow: 0 4px 16px rgba(15,32,56,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-carte:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(15,32,56,0.14); }
+        .stat-carte .valeur { font-size: 1.7rem; font-weight: 700; color: #1e3a5f; }
+        .stat-carte .label { font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem; }
+
+        .grille-graphiques {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+        }
+        @media (max-width: 700px) {
+            .grille-graphiques { grid-template-columns: 1fr; }
+        }
+
+        .panneau {
+            background: white; border-radius: 10px; border: 1px solid #eef0ee;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06); margin-bottom: 1.5rem;
+            transition: box-shadow 0.2s ease;
+        }
+        .panneau:hover { box-shadow: 0 8px 24px rgba(15,32,56,0.1); }
+        .panneau-corps { padding: 1.5rem; }
+        .section-titre { font-size: 1.05rem; font-weight: 700; color: #1e3a5f; margin: 0 0 1rem; font-family: Georgia, serif; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #eef0ee; }
+        th { background: #eef2f7; font-size: 0.8rem; color: #1e3a5f; font-weight: 700; }
+        tbody tr { transition: background 0.15s ease; }
+        tbody tr:hover { background: #f8fafc; }
+        .note-bonne { color: #15803d; font-weight: bold; }
+        .note-moyenne { color: #b45309; font-weight: bold; }
+        .note-faible { color: #b91c1c; font-weight: bold; }
+
+        a.retour {
+            display: inline-block; margin-top: 1.2rem;
+            color: #1e3a5f; text-decoration: none; font-weight: 600;
+            border-bottom: 1px solid #d4af37;
+            transition: opacity 0.2s ease;
+        }
+        a.retour:hover { opacity: 0.7; }
+    </style>
+</head>
+<body>
+
+<div class="barre-laterale">
+    <div class="logo-mini">🎓</div>
+    <a th:href="@{/accueil}" class="icone-nav">🏠<span class="infobulle">Home</span></a>
+    <a th:href="@{/mes-notes}" class="icone-nav actif">📊<span class="infobulle">My Grades</span></a>
+    <a th:href="@{/profil}" class="icone-nav">👤<span class="infobulle">My Profile</span></a>
+    <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
+        <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
+            🚪<span class="infobulle">Log out</span>
+        </button>
+    </form>
+</div>
+
+<div class="zone-principale">
+    <div class="barre-haut">
+        <h1>🎓 EduTrack — My Grades</h1>
+        <a th:href="@{/mes-notes/pdf}" class="btn-pdf">📄 Download PDF</a>
+    </div>
+
+    <div class="contenu">
+        <div class="stats">
+            <div class="stat-carte anime d1">
+                <div class="valeur" th:text="${#numbers.formatDecimal(moyenneGenerale, 1, 2)} + '/20'"></div>
+                <div class="label">Overall average</div>
+            </div>
+            <div class="stat-carte anime d2">
+                <div class="valeur" th:text="${#lists.size(notes)}"></div>
+                <div class="label">Grades recorded</div>
+            </div>
+            <div class="stat-carte anime d3">
+                <div class="valeur" th:text="${#maps.size(moyennesParSemestre)}"></div>
+                <div class="label">Semesters evaluated</div>
+            </div>
+        </div>
+
+        <div class="grille-graphiques">
+            <div class="panneau anime d2">
+                <div class="panneau-corps">
+                    <p class="section-titre">📈 Average by semester</p>
+                    <canvas id="graphiqueSemestre" height="130"></canvas>
+                </div>
+            </div>
+            <div class="panneau anime d3">
+                <div class="panneau-corps">
+                    <p class="section-titre">🎯 Grade distribution</p>
+                    <canvas id="graphiqueDistribution" height="130"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="panneau anime d4">
+            <div class="panneau-corps">
+                <p class="section-titre">📊 Grade Details</p>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th>Grade</th>
+                        <th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="note : ${notes}">
+                        <td th:text="${note.matiere.nom}"></td>
+                        <td th:text="${note.typeExamen}"></td>
+                        <td>
+                                <span th:text="${note.valeur}"
+                                      th:classappend="${note.valeur >= 14} ? 'note-bonne' : (${note.valeur >= 10} ? 'note-moyenne' : 'note-faible')"></span>
+                            / 20
+                        </td>
+                        <td th:text="${note.date}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(notes)}">
+                        <td colspan="4">No grades yet.</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <a th:href="@{/accueil}" class="retour">← Back to home</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var semestreData = /*[[${moyennesParSemestre}]]*/ {};
+    var nbBonnes = /*[[${nbBonnes}]]*/ 0;
+    var nbMoyennes = /*[[${nbMoyennes}]]*/ 0;
+    var nbFaibles = /*[[${nbFaibles}]]*/ 0;
+    /*]]>*/
+
+    var labelsSemestre = Object.keys(semestreData).map(function(s) { return "Semester " + s; });
+    var valeursSemestre = Object.values(semestreData);
+
+    new Chart(document.getElementById('graphiqueSemestre'), {
+        type: 'bar',
+        data: {
+            labels: labelsSemestre,
+            datasets: [{
+                label: 'Average (out of 20)',
+                data: valeursSemestre,
+                backgroundColor: '#1e3a5f',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: { duration: 900, easing: 'easeOutQuart' },
+            scales: { y: { beginAtZero: true, max: 20 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    new Chart(document.getElementById('graphiqueDistribution'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Good (≥14)', 'Average (10-14)', 'Weak (<10)'],
+            datasets: [{
+                data: [nbBonnes, nbMoyennes, nbFaibles],
+                backgroundColor: ['#15803d', '#d97706', '#b91c1c'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: { duration: 900, easing: 'easeOutQuart' },
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+        }
+    });
+</script>
+
+</body>
+</html>

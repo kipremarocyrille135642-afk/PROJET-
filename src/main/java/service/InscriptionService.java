@@ -15,14 +15,28 @@ public class InscriptionService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Utilisateur inscrire(String email, String motDePasseEnClair) {
+    public Utilisateur inscrire(String email, String motDePasseEnClair, String nom, String prenom) {
+        if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalStateException("Invalid email address.");
+        }
+        if (nom == null || nom.isBlank()) {
+            throw new IllegalStateException("Last name is required.");
+        }
+        if (prenom == null || prenom.isBlank()) {
+            throw new IllegalStateException("First name is required.");
+        }
+        if (motDePasseEnClair == null || motDePasseEnClair.length() < 6) {
+            throw new IllegalStateException("Password must be at least 6 characters long.");
+        }
         if (utilisateurRepository.existsByEmail(email)) {
-            throw new IllegalStateException("Un compte existe déjà avec cet email.");
+            throw new IllegalStateException("An account already exists with this email.");
         }
 
         Utilisateur utilisateur = new Utilisateur();
-        utilisateur.setEmail(email);
+        utilisateur.setEmail(email.trim().toLowerCase());
         utilisateur.setMotDePasse(passwordEncoder.encode(motDePasseEnClair));
+        utilisateur.setNom(nom.trim());
+        utilisateur.setPrenom(prenom.trim());
         return utilisateurRepository.save(utilisateur);
     }
 }

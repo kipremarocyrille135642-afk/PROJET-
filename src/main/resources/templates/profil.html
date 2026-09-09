@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile - EduTrack</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: #f0f1ed;
+        }
+        .barre-haut {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: Georgia, serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .contenu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+        }
+        .carte {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(15,32,56,0.1);
+            width: 380px;
+            padding: 2.8rem 2.5rem;
+            text-align: center;
+            border-top: 4px solid #d4af37;
+        }
+        h1 {
+            font-size: 1.4rem; margin: 0 0 1.8rem; color: #1e3a5f;
+            font-family: Georgia, serif;
+        }
+
+        .photo-profil {
+            width: 120px; height: 120px; border-radius: 50%;
+            object-fit: cover; display: block; margin: 0 auto 1rem;
+            border: 4px solid #1e3a5f;
+        }
+        .photo-vide {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: #1e3a5f;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem; font-size: 2.5rem; color: #d4af37;
+        }
+        .nom { font-size: 1.15rem; font-weight: 700; color: #1a1a1a; margin: 0; }
+        .email { color: #888; font-size: 0.88rem; margin: 0.2rem 0 1.5rem; }
+
+        .info { color: #15803d; font-size: 0.85rem; margin-bottom: 1rem; }
+
+        form { text-align: left; margin-top: 1rem; }
+        label {
+            display: block; font-size: 0.8rem; margin-bottom: 0.4rem; color: #444;
+            text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+        }
+        input[type="file"] {
+            width: 100%; padding: 0.6rem; border: 1px dashed #d8d8d3;
+            border-radius: 3px; box-sizing: border-box; font-size: 0.85rem;
+        }
+        button {
+            margin-top: 1.2rem; width: 100%; padding: 0.8rem;
+            background: #1e3a5f;
+            color: white; border: none; border-radius: 3px;
+            font-size: 0.9rem; cursor: pointer; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        button:hover { background: #14263f; }
+
+        a.retour {
+            display: inline-block; margin-top: 1.4rem;
+            color: #1e3a5f; text-decoration: none; font-weight: 600;
+            border-bottom: 1px solid #d4af37; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="barre-haut">🎓 EduTrack</div>
+<div class="contenu">
+    <div class="carte">
+        <h1>My Profile</h1>
+
+        <img th:if="${utilisateur.photoBase64 != null}"
+             th:src="${utilisateur.photoBase64}"
+             class="photo-profil" alt="Profile photo">
+        <div th:if="${utilisateur.photoBase64 == null}" class="photo-vide">👤</div>
+
+        <p class="nom" th:text="${utilisateur.prenom} + ' ' + ${utilisateur.nom}"></p>
+        <p class="email" th:text="${utilisateur.email}"></p>
+
+        <p class="info" th:if="${param.succes}">Photo updated!</p>
+
+        <form th:action="@{/profil/photo}" method="post" enctype="multipart/form-data">
+            <label for="photo">Change my photo</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <a th:href="@{/accueil}" class="retour">← Back to home</a>
+    </div>
+</div>
+</body>
+</html>
