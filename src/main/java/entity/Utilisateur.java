@@ -24,7 +24,7 @@ public class Utilisateur {
     private String prenom;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String photoBase64;
 
     public Utilisateur() {}
