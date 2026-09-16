@@ -70,16 +70,16 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (faculteRepository.count() == 0) {
             creerStructureAcademique();
+        }
 
-            for (String[] eleve : ELEVES_EXEMPLE) {
-                if (!utilisateurRepository.existsByEmail(eleve[0])) {
-                    creerEleveExemple(eleve[0], eleve[1], eleve[2]);
-                }
+        for (String[] eleve : ELEVES_EXEMPLE) {
+            if (!utilisateurRepository.existsByEmail(eleve[0])) {
+                creerEleveExemple(eleve[0], eleve[1], eleve[2]);
             }
+        }
 
-            if (!utilisateurRepository.existsByEmail("admin@demo.ci")) {
-                creerAdmin();
-            }
+        if (!utilisateurRepository.existsByEmail("admin@demo.ci")) {
+            creerAdmin();
         }
 
         if (professeurRepository.count() == 0) {
