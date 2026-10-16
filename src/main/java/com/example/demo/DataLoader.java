@@ -155,12 +155,12 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void creerProfesseurs() {
-        professeurRepository.save(new Professeur("Sharma", "Rajesh", "Programming & Algorithms", "https://randomuser.me/api/portraits/men/32.jpg"));
-        professeurRepository.save(new Professeur("Patel", "Priya", "Databases", "https://randomuser.me/api/portraits/women/44.jpg"));
-        professeurRepository.save(new Professeur("Mehta", "Arjun", "Networks & Cybersecurity", "https://randomuser.me/api/portraits/men/56.jpg"));
-        professeurRepository.save(new Professeur("Iyer", "Ananya", "Artificial Intelligence", "https://randomuser.me/api/portraits/women/68.jpg"));
-        professeurRepository.save(new Professeur("Singh", "Vikram", "Web Development", "https://randomuser.me/api/portraits/men/12.jpg"));
-        professeurRepository.save(new Professeur("Desai", "Kavita", "Project Management", "https://randomuser.me/api/portraits/women/21.jpg"));
+        professeurRepository.save(new Professeur("Sharma", "Rajesh", "Programming & Algorithms", "/images/professeurs/prof1.jpg"));
+        professeurRepository.save(new Professeur("Patel", "Priya", "Databases", "/images/professeurs/prof2.jpg"));
+        professeurRepository.save(new Professeur("Mehta", "Arjun", "Networks & Cybersecurity", "/images/professeurs/prof3.jpg"));
+        professeurRepository.save(new Professeur("Iyer", "Ananya", "Artificial Intelligence", "/images/professeurs/prof4.jpg"));
+        professeurRepository.save(new Professeur("Singh", "Vikram", "Web Development", "/images/professeurs/prof5.jpg"));
+        professeurRepository.save(new Professeur("Desai", "Kavita", "Project Management", "/images/professeurs/prof6.jpg"));
     }
 
     private void creerEmploiDuTemps() {
