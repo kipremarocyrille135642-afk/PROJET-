@@ -82,9 +82,8 @@ public class DataLoader implements CommandLineRunner {
             creerAdmin();
         }
 
-        if (professeurRepository.count() == 0) {
-            creerProfesseurs();
-        }
+        professeurRepository.deleteAll();
+        creerProfesseurs();
 
         if (annonceRepository.count() == 0) {
             annonceRepository.save(new Annonce("Welcome to EduTrack! Please check your grades and attendance regularly."));
@@ -157,12 +156,12 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void creerProfesseurs() {
-        professeurRepository.save(new Professeur("Kouassi", "Jean-Marc", "Programming & Algorithms", "https://randomuser.me/api/portraits/men/32.jpg"));
-        professeurRepository.save(new Professeur("Traore", "Fatou", "Databases", "https://randomuser.me/api/portraits/women/44.jpg"));
-        professeurRepository.save(new Professeur("Diarra", "Souleymane", "Networks & Cybersecurity", "https://randomuser.me/api/portraits/men/56.jpg"));
-        professeurRepository.save(new Professeur("Bamba", "Aminata", "Artificial Intelligence", "https://randomuser.me/api/portraits/women/68.jpg"));
-        professeurRepository.save(new Professeur("Konate", "Ibrahim", "Web Development", "https://randomuser.me/api/portraits/men/12.jpg"));
-        professeurRepository.save(new Professeur("Yao", "Marie-Claire", "Project Management", "https://randomuser.me/api/portraits/women/21.jpg"));
+        professeurRepository.save(new Professeur("Sharma", "Rajesh", "Programming & Algorithms", "https://randomuser.me/api/portraits/men/32.jpg"));
+        professeurRepository.save(new Professeur("Patel", "Priya", "Databases", "https://randomuser.me/api/portraits/women/44.jpg"));
+        professeurRepository.save(new Professeur("Mehta", "Arjun", "Networks & Cybersecurity", "https://randomuser.me/api/portraits/men/56.jpg"));
+        professeurRepository.save(new Professeur("Iyer", "Ananya", "Artificial Intelligence", "https://randomuser.me/api/portraits/women/68.jpg"));
+        professeurRepository.save(new Professeur("Singh", "Vikram", "Web Development", "https://randomuser.me/api/portraits/men/12.jpg"));
+        professeurRepository.save(new Professeur("Desai", "Kavita", "Project Management", "https://randomuser.me/api/portraits/women/21.jpg"));
     }
 
     private void creerEmploiDuTemps() {
