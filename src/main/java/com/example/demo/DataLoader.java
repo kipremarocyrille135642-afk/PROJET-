@@ -155,12 +155,12 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void creerProfesseurs() {
-        professeurRepository.save(new Professeur("Sharma", "Rajesh", "Programming & Algorithms", "/images/professeurs/prof1.jpg"));
-        professeurRepository.save(new Professeur("Patel", "Priya", "Databases", "/images/professeurs/prof2.jpg"));
-        professeurRepository.save(new Professeur("Mehta", "Arjun", "Networks & Cybersecurity", "/images/professeurs/prof3.jpg"));
-        professeurRepository.save(new Professeur("Iyer", "Ananya", "Artificial Intelligence", "/images/professeurs/prof4.jpg"));
-        professeurRepository.save(new Professeur("Singh", "Vikram", "Web Development", "/images/professeurs/prof5.jpg"));
-        professeurRepository.save(new Professeur("Desai", "Kavita", "Project Management", "/images/professeurs/prof6.jpg"));
+        professeurRepository.save(new Professeur("Sharma", "Rajesh", "Programming & Algorithms", "https://ui-avatars.com/api/?name=Rajesh+Sharma&size=200&background=1e3a8a&color=ffffff"));
+        professeurRepository.save(new Professeur("Patel", "Priya", "Databases", "https://ui-avatars.com/api/?name=Priya+Patel&size=200&background=be185d&color=ffffff"));
+        professeurRepository.save(new Professeur("Mehta", "Arjun", "Networks & Cybersecurity", "https://ui-avatars.com/api/?name=Arjun+Mehta&size=200&background=047857&color=ffffff"));
+        professeurRepository.save(new Professeur("Iyer", "Ananya", "Artificial Intelligence", "https://ui-avatars.com/api/?name=Ananya+Iyer&size=200&background=7c3aed&color=ffffff"));
+        professeurRepository.save(new Professeur("Singh", "Vikram", "Web Development", "https://ui-avatars.com/api/?name=Vikram+Singh&size=200&background=b45309&color=ffffff"));
+        professeurRepository.save(new Professeur("Desai", "Kavita", "Project Management", "https://ui-avatars.com/api/?name=Kavita+Desai&size=200&background=0f766e&color=ffffff"));
     }
 
     private void creerEmploiDuTemps() {
