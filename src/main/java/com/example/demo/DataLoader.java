@@ -82,8 +82,7 @@ public class DataLoader implements CommandLineRunner {
             creerAdmin();
         }
 
-        professeurRepository.deleteAll();
-        creerProfesseurs();
+        if (professeurRepository.count() == 0) { creerProfesseurs(); }
 
         if (annonceRepository.count() == 0) {
             annonceRepository.save(new Annonce("Welcome to EduTrack! Please check your grades and attendance regularly."));
