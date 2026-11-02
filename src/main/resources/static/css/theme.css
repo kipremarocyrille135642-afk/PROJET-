@@ -1,0 +1,34 @@
+:root { --bleu:#1e3a5f; --bleu-fonce:#14263f; --fond:#f5f7fa; }
+body, button, input { font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif !important; }
+body { background: var(--fond) !important; color: #1a1a1a; }
+h1, h2, h3, .section-titre, .barre-haut h1, .banniere h2, .panneau h2, .section-generique h2, .section-profs h2, .popup-entete h3 {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif !important;
+    font-weight: 700;
+}
+.barre-laterale { background: linear-gradient(180deg, #1e3a5f 0%, #14263f 100%) !important; }
+.barre-haut { background: linear-gradient(90deg, #1e3a5f 0%, #2d5a8e 100%) !important; box-shadow: 0 2px 10px rgba(15,32,56,0.15); }
+.panneau, .carte-stat, .stat-carte, .carte-emploi { border-radius: 14px !important; border: 1px solid #e8ecf1 !important; }
+.carte-prof img { border-color: #1e3a5f !important; }
+.panneau-corps, .carte-emploi { overflow-x: auto; }
+table { min-width: 460px; }
+img { max-width: 100%; }
+
+@media (max-width: 700px) {
+    body { padding-bottom: 72px; }
+    .barre-laterale {
+        position: fixed !important; left: 0; right: 0; bottom: 0; top: auto;
+        width: 100% !important; min-height: 0 !important; height: 62px;
+        flex-direction: row !important; justify-content: space-around; align-items: center;
+        padding: 0 0.5rem !important; z-index: 60;
+    }
+    .barre-laterale .logo-mini { display: none; }
+    .icone-nav.deconnexion { margin-top: 0 !important; }
+    .icone-nav .infobulle { display: none; }
+    .barre-haut { padding: 0.9rem 1rem !important; }
+    .barre-haut h1 { font-size: 1rem !important; }
+    .barre-haut .droite > span { display: none; }
+    .banniere { height: 160px !important; padding: 0 1rem; }
+    .banniere h2 { font-size: 1.3rem !important; }
+    .contenu, .section-generique, .section-profs { padding-left: 1rem !important; padding-right: 1rem !important; }
+    .pied-page { padding-bottom: 5rem; }
+}

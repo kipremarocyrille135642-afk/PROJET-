@@ -282,7 +282,7 @@
         .pied-page a { color: #d4af37; text-decoration: none; }
         .pied-page a:hover { text-decoration: underline; }
     </style>
-</head>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" th:href="@{/css/theme.css}"></head>
 <body>
 
 <div class="fond-popup" id="fondPopup">
@@ -488,5 +488,5 @@
         }
     });
 </script>
-</body>
+<script>try{if(sessionStorage.getItem('popupVu')){document.getElementById('fondPopup').style.display='none';}else{sessionStorage.setItem('popupVu','1');}}catch(e){}</script></body>
 </html>
