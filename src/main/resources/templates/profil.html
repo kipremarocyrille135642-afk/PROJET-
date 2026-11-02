@@ -1,111 +1,74 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My Profile - EduTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --bleu:#1e3a5f; --bleu-fonce:#14263f; --bordure:#e2e5ea; --gris:#6b7280; }
         * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            background: #f0f1ed;
-        }
-        .barre-haut {
-            background: #1e3a5f;
-            color: white;
-            padding: 1.1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-family: Georgia, serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-        .contenu {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem 1rem;
-        }
-        .carte {
-            background: #fff;
-            border-radius: 4px;
-            box-shadow: 0 10px 40px rgba(15,32,56,0.1);
-            width: 380px;
-            padding: 2.8rem 2.5rem;
-            text-align: center;
-            border-top: 4px solid #d4af37;
-        }
-        h1 {
-            font-size: 1.4rem; margin: 0 0 1.8rem; color: #1e3a5f;
-            font-family: Georgia, serif;
-        }
-
-        .photo-profil {
-            width: 120px; height: 120px; border-radius: 50%;
-            object-fit: cover; display: block; margin: 0 auto 1rem;
-            border: 4px solid #1e3a5f;
-        }
-        .photo-vide {
-            width: 120px; height: 120px; border-radius: 50%;
-            background: #1e3a5f;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 1rem; font-size: 2.5rem; color: #d4af37;
-        }
-        .nom { font-size: 1.15rem; font-weight: 700; color: #1a1a1a; margin: 0; }
-        .email { color: #888; font-size: 0.88rem; margin: 0.2rem 0 1.5rem; }
-
-        .info { color: #15803d; font-size: 0.85rem; margin-bottom: 1rem; }
-
-        form { text-align: left; margin-top: 1rem; }
-        label {
-            display: block; font-size: 0.8rem; margin-bottom: 0.4rem; color: #444;
-            text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
-        }
-        input[type="file"] {
-            width: 100%; padding: 0.6rem; border: 1px dashed #d8d8d3;
-            border-radius: 3px; box-sizing: border-box; font-size: 0.85rem;
-        }
-        button {
-            margin-top: 1.2rem; width: 100%; padding: 0.8rem;
-            background: #1e3a5f;
-            color: white; border: none; border-radius: 3px;
-            font-size: 0.9rem; cursor: pointer; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        button:hover { background: #14263f; }
-
-        a.retour {
-            display: inline-block; margin-top: 1.4rem;
-            color: #1e3a5f; text-decoration: none; font-weight: 600;
-            border-bottom: 1px solid #d4af37; font-size: 0.9rem;
-        }
+        body { font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; min-height: 100vh; background: #f5f7fa; color: #1a1a1a; }
+        .barre-haut { background: linear-gradient(90deg, #1e3a5f, #2d5a8e); color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+        .barre-haut a { color: #fff; text-decoration: none; font-size: 0.88rem; font-weight: 600; opacity: 0.9; }
+        .barre-haut a:hover { opacity: 1; text-decoration: underline; }
+        .contenu { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 3rem; display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start; }
+        .carte { background: #fff; border-radius: 16px; border: 1px solid #e8ecf1; box-shadow: 0 8px 30px rgba(30,58,95,0.08); padding: 2rem; }
+        .carte h2 { font-size: 1.05rem; margin: 0 0 1.2rem; color: var(--bleu); }
+        .identite { text-align: center; }
+        .photo-profil { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 1rem; border: 4px solid var(--bleu); }
+        .photo-vide { width: 120px; height: 120px; border-radius: 50%; background: var(--bleu); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2.5rem; color: #fff; }
+        .nom { font-size: 1.15rem; font-weight: 700; margin: 0; }
+        .email { color: var(--gris); font-size: 0.88rem; margin: 0.2rem 0 1rem; word-break: break-all; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin: 1rem 0 0.4rem; }
+        input[type="password"], input[type="file"] { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--bordure); border-radius: 10px; font-size: 0.93rem; background: #fafbfc; font-family: inherit; }
+        input:focus { outline: none; border-color: var(--bleu); box-shadow: 0 0 0 3px rgba(30,58,95,0.12); background: #fff; }
+        input[type="file"] { border-style: dashed; font-size: 0.85rem; }
+        button { margin-top: 1.3rem; width: 100%; padding: 0.85rem; background: var(--bleu); color: #fff; border: none; border-radius: 10px; font-size: 0.93rem; cursor: pointer; font-weight: 700; font-family: inherit; }
+        button:hover { background: var(--bleu-fonce); }
+        .alerte { padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.86rem; margin: 0 0 1rem; }
+        .ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .ko { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .aide { font-size: 0.78rem; color: var(--gris); margin-top: 0.4rem; }
+        @media (max-width: 700px) { .contenu { grid-template-columns: 1fr; } .carte { padding: 1.5rem; } }
     </style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"></head>
 <body>
-<div class="barre-haut">🎓 EduTrack</div>
+<div class="barre-haut">
+    <span>&#127891; EduTrack</span>
+    <a th:href="@{/accueil}">&larr; Back to home</a>
+</div>
+
 <div class="contenu">
-    <div class="carte">
-        <h1>My Profile</h1>
-
-        <img th:if="${utilisateur.photoBase64 != null}"
-             th:src="${utilisateur.photoBase64}"
-             class="photo-profil" alt="Profile photo">
-        <div th:if="${utilisateur.photoBase64 == null}" class="photo-vide">👤</div>
-
+    <div class="carte identite">
+        <img th:if="${utilisateur.photoBase64 != null}" th:src="${utilisateur.photoBase64}" class="photo-profil" alt="Profile photo">
+        <div th:if="${utilisateur.photoBase64 == null}" class="photo-vide">&#128100;</div>
         <p class="nom" th:text="${utilisateur.prenom} + ' ' + ${utilisateur.nom}"></p>
         <p class="email" th:text="${utilisateur.email}"></p>
 
-        <p class="info" th:if="${param.succes}">Photo updated!</p>
-
-        <form th:action="@{/profil/photo}" method="post" enctype="multipart/form-data">
+        <p class="alerte ok" th:if="${param.succes}">Photo updated!</p>
+        <form th:action="@{/profil/photo}" method="post" enctype="multipart/form-data" style="text-align:left;">
             <label for="photo">Change my photo</label>
             <input type="file" id="photo" name="photo" accept="image/*" required>
-            <button type="submit">Upload</button>
+            <p class="aide">Max 5 MB.</p>
+            <button type="submit">Upload photo</button>
         </form>
+    </div>
 
-        <a th:href="@{/accueil}" class="retour">← Back to home</a>
+    <div class="carte">
+        <h2>&#128274; Change my password</h2>
+        <p class="alerte ok" th:if="${succesMdp}" th:text="${succesMdp}"></p>
+        <p class="alerte ko" th:if="${erreurMdp}" th:text="${erreurMdp}"></p>
+        <form th:action="@{/profil/mot-de-passe}" method="post">
+            <label for="ancien">Current password</label>
+            <input type="password" id="ancien" name="ancien" autocomplete="current-password" required>
+            <label for="nouveau">New password</label>
+            <input type="password" id="nouveau" name="nouveau" minlength="8" autocomplete="new-password" required>
+            <p class="aide">At least 8 characters.</p>
+            <label for="confirmation">Confirm new password</label>
+            <input type="password" id="confirmation" name="confirmation" minlength="8" autocomplete="new-password" required>
+            <button type="submit">Update password</button>
+        </form>
     </div>
 </div>
 </body>
