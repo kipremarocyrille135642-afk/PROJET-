@@ -149,7 +149,7 @@
 <div class="barre-haut">
     <div class="titre">🎓 EduTrack — Admin Panel</div>
     <div class="droite">
-        <span th:text="${email}"></span>
+        <a href="/admin/professeurs" style="color:#fff;font-weight:600;text-decoration:none;">Faculty photos</a><a href="/profil" style="color:#fff;font-weight:600;text-decoration:none;">My profile</a><span th:text="${email}"></span>
         <form th:action="@{/deconnexion}" method="post" style="margin:0;">
             <button type="submit" class="btn-deconnexion">Log out</button>
         </form>

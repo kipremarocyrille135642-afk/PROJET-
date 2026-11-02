@@ -22,6 +22,9 @@ public class Professeur {
     @Column(length = 500)
     private String photoUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String photoBase64;
+
     public Professeur() {}
 
     public Professeur(String nom, String prenom, String specialite, String photoUrl) {
@@ -41,4 +44,6 @@ public class Professeur {
     public void setSpecialite(String specialite) { this.specialite = specialite; }
     public String getPhotoUrl() { return photoUrl; }
     public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
+    public String getPhotoBase64() { return photoBase64; }
+    public void setPhotoBase64(String photoBase64) { this.photoBase64 = photoBase64; }
 }

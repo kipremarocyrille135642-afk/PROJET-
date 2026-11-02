@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Faculty photos - EduTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bleu:#1e3a5f; --bleu-fonce:#14263f; --bordure:#e2e5ea; --gris:#6b7280; }
+        * { box-sizing: border-box; }
+        body { font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; background: #f5f7fa; color: #1a1a1a; }
+        .barre-haut { background: linear-gradient(90deg, #1e3a5f, #2d5a8e); color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; font-weight: 700; flex-wrap: wrap; gap: 0.5rem; }
+        .barre-haut a { color: #fff; text-decoration: none; font-size: 0.88rem; font-weight: 600; opacity: 0.9; }
+        .barre-haut a:hover { opacity: 1; text-decoration: underline; }
+        .page { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+        h1 { font-size: 1.4rem; color: var(--bleu); margin: 0 0 0.3rem; }
+        .sous { color: var(--gris); font-size: 0.9rem; margin: 0 0 1.5rem; }
+        .alerte { padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.86rem; margin: 0 0 1rem; }
+        .ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .ko { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
+        .carte { background: #fff; border: 1px solid #e8ecf1; border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: 0 6px 24px rgba(30,58,95,0.07); }
+        .carte img, .vide { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bleu); margin: 0 auto 0.8rem; display: block; }
+        .vide { background: var(--bleu); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; }
+        .nom { font-weight: 700; }
+        .spec { color: var(--gris); font-size: 0.82rem; margin-bottom: 1rem; }
+        input[type="file"] { width: 100%; font-size: 0.78rem; padding: 0.5rem; border: 1px dashed var(--bordure); border-radius: 10px; background: #fafbfc; }
+        button { margin-top: 0.7rem; width: 100%; padding: 0.65rem; border: none; border-radius: 10px; background: var(--bleu); color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: inherit; }
+        button:hover { background: var(--bleu-fonce); }
+        button.retirer { background: #fee2e2; color: #b91c1c; margin-top: 0.4rem; }
+        button.retirer:hover { background: #fecaca; }
+    </style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"></head>
+<body>
+<div class="barre-haut">
+    <span>&#127891; EduTrack &mdash; Admin</span>
+    <span>
+        <a th:href="@{/admin/notes}">&larr; Admin panel</a>
+    </span>
+</div>
+<div class="page">
+    <h1>Faculty photos</h1>
+    <p class="sous">Upload a photo for each teacher (JPG, PNG or WebP, 1 MB maximum). Without a photo, an initials avatar is shown.</p>
+
+    <p class="alerte ok" th:if="${succesMessage}" th:text="${succesMessage}"></p>
+    <p class="alerte ko" th:if="${erreur}" th:text="${erreur}"></p>
+
+    <div class="grille">
+        <div class="carte" th:each="prof : ${professeurs}">
+            <img th:if="${prof.photoBase64 != null}" th:src="${prof.photoBase64}" alt="Teacher photo">
+            <img th:if="${prof.photoBase64 == null and prof.photoUrl != null}" th:src="${prof.photoUrl}" alt="Teacher photo">
+            <div class="vide" th:if="${prof.photoBase64 == null and prof.photoUrl == null}" th:text="${#strings.substring(prof.prenom,0,1) + #strings.substring(prof.nom,0,1)}"></div>
+            <div class="nom" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
+            <div class="spec" th:text="${prof.specialite}"></div>
+            <form th:action="@{'/admin/professeurs/' + ${prof.id} + '/photo'}" method="post" enctype="multipart/form-data">
+                <input type="file" name="photo" accept="image/*" required>
+                <button type="submit">Upload photo</button>
+            </form>
+            <form th:if="${prof.photoBase64 != null}" th:action="@{'/admin/professeurs/' + ${prof.id} + '/photo/supprimer'}" method="post"
+                  onsubmit="return confirm('Remove this photo?');">
+                <button type="submit" class="retirer">Remove photo</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -434,12 +434,12 @@
             <div class="carrousel-conteneur">
                 <div class="carrousel-piste">
                     <div class="carte-prof" th:each="prof : ${professeurs}">
-                        <img th:src="${prof.photoUrl}" alt="Teacher photo">
+                        <img th:src="${prof.photoBase64 != null} ? ${prof.photoBase64} : ${prof.photoUrl}" alt="Teacher photo">
                         <div class="nom-prof" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
                         <div class="specialite-prof" th:text="${prof.specialite}"></div>
                     </div>
                     <div class="carte-prof" th:each="prof : ${professeurs}">
-                        <img th:src="${prof.photoUrl}" alt="Teacher photo">
+                        <img th:src="${prof.photoBase64 != null} ? ${prof.photoBase64} : ${prof.photoUrl}" alt="Teacher photo">
                         <div class="nom-prof" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
                         <div class="specialite-prof" th:text="${prof.specialite}"></div>
                     </div>
