@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/css/edutrack.css}">
@@ -130,10 +130,10 @@
 <body>
 
 <div class="barre-laterale">
-    <div class="logo-mini">ðŸŽ“</div>
-    <a th:href="@{/accueil}" class="icone-nav">ðŸ <span class="infobulle">Home</span></a>
+    <div class="logo-mini"></div>
+    <a th:href="@{/accueil}" class="icone-nav"><span class="infobulle">Home</span></a>
     <a th:href="@{/mes-notes}" class="icone-nav actif">ðŸ“Š<span class="infobulle">My Grades</span></a>
-    <a th:href="@{/profil}" class="icone-nav">ðŸ‘¤<span class="infobulle">My Profile</span></a>
+    <a th:href="@{/profil}" class="icone-nav"><span class="infobulle">My Profile</span></a>
     <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
         <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
             ðŸšª<span class="infobulle">Log out</span>
@@ -143,7 +143,7 @@
 
 <div class="zone-principale">
     <div class="barre-haut">
-        <h1>ðŸŽ“ EduTrack â€” My Grades</h1>
+        <h1>EduTrack â€” My Grades</h1>
         <a th:href="@{/mes-notes/pdf}" class="btn-pdf">ðŸ“„ Download PDF</a>
     </div>
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/css/edutrack.css}">
@@ -317,13 +317,13 @@
 
 <div class="enveloppe">
     <div class="barre-laterale">
-        <div class="logo-mini">ðŸŽ“</div>
-        <a th:href="@{/accueil}" class="icone-nav actif">ðŸ <span class="infobulle">Home</span></a>
+        <div class="logo-mini"></div>
+        <a th:href="@{/accueil}" class="icone-nav actif"><span class="infobulle">Home</span></a>
         <a th:href="@{/mes-notes}" class="icone-nav">
             ðŸ“Š<span class="infobulle">My Grades</span>
             <span th:if="${notificationRecente}" class="badge-notif"></span>
         </a>
-        <a th:href="@{/profil}" class="icone-nav">ðŸ‘¤<span class="infobulle">My Profile</span></a>
+        <a th:href="@{/profil}" class="icone-nav"><span class="infobulle">My Profile</span></a>
         <a th:if="${estAdmin}" th:href="@{/admin/notes}" class="icone-nav">ðŸ”<span class="infobulle">Admin Panel</span></a>
         <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
             <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
@@ -334,13 +334,13 @@
 
     <div class="zone-principale">
         <div class="barre-haut">
-            <h1>ðŸŽ“ EduTrack</h1>
+            <h1>EduTrack</h1>
             <div class="droite">
                 <span th:text="${email}"></span>
                 <img th:if="${utilisateur.photoBase64 != null}" th:src="${utilisateur.photoBase64}" class="photo-mini" onclick="document.getElementById('menuProfil').classList.toggle('ouvert')">
-                <div th:if="${utilisateur.photoBase64 == null}" class="photo-mini-vide" onclick="document.getElementById('menuProfil').classList.toggle('ouvert')">ðŸ‘¤</div>
+                <div th:if="${utilisateur.photoBase64 == null}" class="photo-mini-vide" onclick="document.getElementById('menuProfil').classList.toggle('ouvert')"></div>
                 <div class="menu-profil" id="menuProfil">
-                    <a th:href="@{/profil}">ðŸ‘¤ My Profile</a>
+                    <a th:href="@{/profil}">My Profile</a>
                     <a th:href="@{/mes-notes}">ðŸ“Š My Grades</a>
                     <form th:action="@{/deconnexion}" method="post" style="margin:0;">
                         <button type="submit" class="deco">ðŸšª Log out</button>
@@ -396,7 +396,7 @@
                     </div>
                     <div class="liens-rapides">
                         <a th:href="@{/mes-notes}" class="lien-rapide">ðŸ“Š View my grades</a>
-                        <a th:href="@{/profil}" class="lien-rapide">ðŸ‘¤ My profile</a>
+                        <a th:href="@{/profil}" class="lien-rapide">My profile</a>
                     </div>
                 </div>
             </div>
@@ -456,7 +456,7 @@
         <a th:href="@{/mes-notes}">My Grades</a>
         <a th:href="@{/profil}">My Profile</a>
     </div>
-    <p>ðŸŽ“ EduTrack â€” Academic Tracking Platform Â· contact@edutrack.demo</p>
+    <p>EduTrack â€” Academic Tracking Platform Â· contact@edutrack.demo</p>
 </div>
 
 <script th:inline="javascript">
