@@ -70,19 +70,19 @@
 <body>
 <div class="carte">
     <div class="entete">
-        <div class="icone">ðŸ”</div>
+        <div class="icone"></div>
         <h1>Espace Administrateur</h1>
         <p th:text="${email}"></p>
     </div>
     <div class="corps">
         <a th:href="@{/admin/notes}" class="lien-carte">
-            <span class="emoji"></span> GÃ©rer les notes
+            <span class="emoji"></span> Grer les notes
         </a>
 
-        <a th:href="@{/accueil}" class="retour">â† Back to home</a>
+        <a th:href="@{/accueil}" class="retour"> Back to home</a>
 
         <form th:action="@{/deconnexion}" method="post">
-            <button type="submit">Se dÃ©connecter</button>
+            <button type="submit">Se dconnecter</button>
         </form>
     </div>
 </div>
