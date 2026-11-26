@@ -49,10 +49,9 @@
 
         <p class="alerte ok" th:if="${param.succes}">Photo updated!</p>
         <form th:action="@{/profil/photo}" method="post" enctype="multipart/form-data" style="text-align:left;">
-            <label for="photo">Change my photo</label>
-            <input type="file" id="photo" name="photo" accept="image/*" required>
+            <label for="photo" style="display:block;margin:1rem 0 0.4rem;padding:0.75rem 1rem;text-align:center;border-radius:10px;background:var(--bleu);color:#fff;font-weight:700;font-size:0.93rem;cursor:pointer;">Change my photo</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required style="display:none" onchange="this.form.submit()">
             <p class="aide">Max 5 MB.</p>
-            <button type="submit">Upload photo</button>
         </form>
     </div>
 
