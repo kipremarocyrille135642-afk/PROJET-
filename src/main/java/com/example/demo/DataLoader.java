@@ -40,6 +40,9 @@ public class DataLoader implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private com.example.demo.repository.NouvelEleveRepository nouvelEleveRepository;
+
     private static final String[] JOURS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
     private static final String[] SALLES = {"Room A101", "Room A102", "Room B201", "Room B202", "Computer Lab 1"};
 
@@ -85,6 +88,7 @@ public class DataLoader implements CommandLineRunner {
         }
 
         for (String[] e : ELEVES_INDIENS) { if (!utilisateurRepository.existsByEmail(e[0])) { Utilisateur u = new Utilisateur(); u.setEmail(e[0]); u.setNom(e[1]); u.setPrenom(e[2]); u.setMotDePasse(passwordEncoder.encode(e[3])); utilisateurRepository.save(u); } }
+        for (String[] e : ELEVES_INDIENS) { if (!nouvelEleveRepository.existsByEmail(e[0])) { com.example.demo.entity.NouvelEleve n = new com.example.demo.entity.NouvelEleve(); n.setEmail(e[0]); n.setNom(e[1]); n.setPrenom(e[2]); n.setFiliere("BCA"); n.setSemestre(1); n.setStatut("Accepted"); nouvelEleveRepository.save(n); } }
         if (professeurRepository.count() == 0) { creerProfesseurs(); }
 
         if (annonceRepository.count() == 0) {
