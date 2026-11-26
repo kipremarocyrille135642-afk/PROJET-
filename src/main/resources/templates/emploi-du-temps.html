@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/css/edutrack.css}">
     <meta charset="UTF-8">
-    <title>Emploi du temps - EduTrack</title>
+    <title>Class Schedule - EduTrack</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -92,7 +92,7 @@
     <div class="logo-mini">ðŸŽ“</div>
     <a th:href="@{/accueil}" class="icone-nav">ðŸ <span class="infobulle">Accueil</span></a>
     <a th:href="@{/mes-notes}" class="icone-nav">ðŸ“Š<span class="infobulle">Mes notes</span></a>
-    <a th:href="@{/emploi-du-temps}" class="icone-nav actif">ðŸ—“ï¸<span class="infobulle">Emploi du temps</span></a>
+    <a th:href="@{/emploi-du-temps}" class="icone-nav actif">ðŸ—“ï¸<span class="infobulle">Class Schedule</span></a>
     <a th:href="@{/profil}" class="icone-nav">ðŸ‘¤<span class="infobulle">Mon profil</span></a>
     <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
         <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
@@ -103,7 +103,7 @@
 
 <div class="zone-principale">
     <div class="barre-haut">
-        <h1>ðŸŽ“ EduTrack â€” Emploi du temps</h1>
+        <h1>ðŸŽ“ EduTrack â€” Class Schedule</h1>
     </div>
     <div class="contenu">
         <div class="selecteur-semestre">
