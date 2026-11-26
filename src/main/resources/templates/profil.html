@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <link rel="stylesheet" th:href="@{/css/edutrack.css}">
@@ -36,14 +36,14 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"></head>
 <body>
 <div class="barre-haut">
-    <span>&#127891; EduTrack</span>
+    <span>EduTrack</span>
     <a th:href="@{/accueil}">&larr; Back to home</a>
 </div>
 
 <div class="contenu">
     <div class="carte identite">
         <img th:if="${utilisateur.photoBase64 != null}" th:src="${utilisateur.photoBase64}" class="photo-profil" alt="Profile photo">
-        <div th:if="${utilisateur.photoBase64 == null}" class="photo-vide">&#128100;</div>
+        <div th:if="${utilisateur.photoBase64 == null}" class="photo-vide"></div>
         <p class="nom" th:text="${utilisateur.prenom} + ' ' + ${utilisateur.nom}"></p>
         <p class="email" th:text="${utilisateur.email}"></p>
 
@@ -57,7 +57,7 @@
     </div>
 
     <div class="carte">
-        <h2>&#128274; Change my password</h2>
+        <h2>Change my password</h2>
         <p class="alerte ok" th:if="${succesMdp}" th:text="${succesMdp}"></p>
         <p class="alerte ko" th:if="${erreurMdp}" th:text="${erreurMdp}"></p>
         <form th:action="@{/profil/mot-de-passe}" method="post">
