@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" th:href="@{/css/edutrack.css}">
     <meta charset="UTF-8">
     <title>Emploi du temps - EduTrack</title>
     <style>
@@ -88,21 +89,21 @@
 <body>
 
 <div class="barre-laterale">
-    <div class="logo-mini">🎓</div>
-    <a th:href="@{/accueil}" class="icone-nav">🏠<span class="infobulle">Accueil</span></a>
-    <a th:href="@{/mes-notes}" class="icone-nav">📊<span class="infobulle">Mes notes</span></a>
-    <a th:href="@{/emploi-du-temps}" class="icone-nav actif">🗓️<span class="infobulle">Emploi du temps</span></a>
-    <a th:href="@{/profil}" class="icone-nav">👤<span class="infobulle">Mon profil</span></a>
+    <div class="logo-mini">ðŸŽ“</div>
+    <a th:href="@{/accueil}" class="icone-nav">ðŸ <span class="infobulle">Accueil</span></a>
+    <a th:href="@{/mes-notes}" class="icone-nav">ðŸ“Š<span class="infobulle">Mes notes</span></a>
+    <a th:href="@{/emploi-du-temps}" class="icone-nav actif">ðŸ—“ï¸<span class="infobulle">Emploi du temps</span></a>
+    <a th:href="@{/profil}" class="icone-nav">ðŸ‘¤<span class="infobulle">Mon profil</span></a>
     <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
         <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
-            🚪<span class="infobulle">Se déconnecter</span>
+            ðŸšª<span class="infobulle">Se dÃ©connecter</span>
         </button>
     </form>
 </div>
 
 <div class="zone-principale">
     <div class="barre-haut">
-        <h1>🎓 EduTrack — Emploi du temps</h1>
+        <h1>ðŸŽ“ EduTrack â€” Emploi du temps</h1>
     </div>
     <div class="contenu">
         <div class="selecteur-semestre">
@@ -115,7 +116,7 @@
         <div class="carte">
             <table th:if="${not #lists.isEmpty(seances)}">
                 <thead>
-                <tr><th>Jour</th><th>Horaire</th><th>Matière</th><th>Salle</th></tr>
+                <tr><th>Jour</th><th>Horaire</th><th>MatiÃ¨re</th><th>Salle</th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="seance : ${seances}">
@@ -127,7 +128,7 @@
                 </tbody>
             </table>
             <div class="vide" th:if="${#lists.isEmpty(seances)}">
-                Aucune séance programmée pour ce semestre.
+                Aucune sÃ©ance programmÃ©e pour ce semestre.
             </div>
         </div>
     </div>

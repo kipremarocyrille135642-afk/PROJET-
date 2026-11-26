@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <link rel="stylesheet" th:href="@{/css/edutrack.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - EduTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bleu: #1e3a5f;
+            --bleu-fonce: #14263f;
+            --bleu-clair: #e8eef6;
+            --texte: #1a1a1a;
+            --gris: #6b7280;
+            --bordure: #e2e5ea;
+            --fond: #f5f7fa;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; background: var(--fond);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem; color: var(--texte);
+        }
+        .carte {
+            display: flex; width: 100%; max-width: 1000px; min-height: 600px;
+            background: #fff; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 20px 60px rgba(30,58,95,0.15);
+        }
+        .gauche { flex: 1; padding: 3rem; display: flex; flex-direction: column; justify-content: center; }
+        .marque { display: flex; align-items: center; gap: 0.6rem; font-size: 1.3rem; font-weight: 800; color: var(--bleu); margin-bottom: 2.2rem; }
+        .marque .logo { width: 40px; height: 40px; border-radius: 10px; background: var(--bleu); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        h1 { font-size: 1.8rem; margin: 0 0 0.3rem; font-weight: 800; }
+        .sous-titre { color: var(--gris); font-size: 0.92rem; margin: 0 0 1.5rem; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin: 1.1rem 0 0.4rem; }
+        .champ { position: relative; }
+        input {
+            width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--bordure);
+            border-radius: 10px; font-size: 0.95rem; background: #fafbfc; font-family: inherit;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        input:focus { outline: none; border-color: var(--bleu); background: #fff; box-shadow: 0 0 0 3px rgba(30,58,95,0.12); }
+        .voir {
+            position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: var(--gris); font-size: 0.78rem;
+            font-weight: 600; cursor: pointer; padding: 0.4rem 0.6rem; width: auto; margin: 0;
+        }
+        .bouton {
+            margin-top: 1.6rem; width: 100%; padding: 0.9rem; background: var(--bleu);
+            color: #fff; border: none; border-radius: 10px; font-size: 0.97rem;
+            cursor: pointer; font-weight: 700; font-family: inherit; transition: background .15s, transform .1s;
+        }
+        .bouton:hover { background: var(--bleu-fonce); }
+        .bouton:active { transform: scale(0.99); }
+        .alerte { padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.86rem; margin: 0 0 0.5rem; }
+        .erreur { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .info { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        a { color: var(--bleu); text-decoration: none; font-weight: 600; }
+        a:hover { text-decoration: underline; }
+        .lien-bas { margin-top: 1.5rem; font-size: 0.88rem; color: var(--gris); text-align: center; }
+
+        .droite {
+            flex: 1.1; padding: 3rem; color: #fff; display: flex; flex-direction: column; justify-content: center;
+            background: linear-gradient(145deg, #1e3a5f 0%, #2d5a8e 60%, #3b73b3 100%);
+            position: relative; overflow: hidden;
+        }
+        .droite::before { content: ""; position: absolute; top: -120px; right: -120px; width: 340px; height: 340px; border-radius: 50%; background: rgba(255,255,255,0.07); }
+        .droite::after { content: ""; position: absolute; bottom: -140px; left: -100px; width: 320px; height: 320px; border-radius: 50%; border: 36px solid rgba(255,255,255,0.06); }
+        .droite > * { position: relative; z-index: 1; }
+        .droite h2 { font-size: 2.2rem; line-height: 1.2; margin: 0 0 1rem; font-weight: 800; }
+        .droite h2 span { color: #9ec5f0; }
+        .droite .description { color: rgba(255,255,255,0.85); font-size: 0.98rem; line-height: 1.6; max-width: 420px; margin: 0 0 2rem; }
+        .points { display: flex; flex-direction: column; gap: 0.9rem; }
+        .point { display: flex; align-items: center; gap: 0.9rem; font-weight: 600; font-size: 0.92rem; }
+        .point .icone { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+        @media (max-width: 800px) {
+            body { padding: 0; align-items: stretch; background: #fff; }
+            .carte { border-radius: 0; box-shadow: none; min-height: 100vh; flex-direction: column; }
+            .gauche { padding: 2rem 1.5rem; }
+            .droite { display: none; }
+        }
+    </style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"></head>
+<body>
+<div class="carte">
+    <div class="gauche">
+        <div class="marque"><span class="logo">&#127891;</span> EduTrack</div>
+        <h1>Login</h1>
+        <p class="sous-titre">Access your student portal</p>
+
+        <p class="alerte erreur" th:if="${erreur}" th:text="${erreur}"></p>
+        <p class="alerte info" th:if="${info}" th:text="${info}"></p>
+        <p class="alerte info" th:if="${param.inscrit}">Account created! You can now log in.</p>
+
+        <form th:action="@{/login}" method="post">
+            <label for="username">Email</label>
+            <input type="email" id="username" name="username" placeholder="your.email@demo.ci" autocomplete="username" required>
+
+            <label for="password">Password</label>
+            <div class="champ">
+                <input type="password" id="password" name="password" placeholder="Your password" autocomplete="current-password" required>
+                <button type="button" class="voir" onclick="var p=document.getElementById('password');var v=p.type==='password';p.type=v?'text':'password';this.textContent=v?'Hide':'Show';">Show</button>
+            </div>
+
+            <button type="submit" class="bouton">Log in</button>
+        </form>
+        <p class="lien-bas">Don't have an account yet? <a th:href="@{/inscription}">Create an account</a></p>
+    </div>
+
+    <div class="droite">
+        <h2>Your success,<br><span>simply tracked.</span></h2>
+        <p class="description">EduTrack brings together your grades, your academic progress and your profile in one place, accessible anytime.</p>
+        <div class="points">
+            <div class="point"><div class="icone">&#128202;</div>Real-time grades</div>
+            <div class="point"><div class="icone">&#128200;</div>Progress tracking</div>
+            <div class="point"><div class="icone">&#128274;</div>Secure access</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

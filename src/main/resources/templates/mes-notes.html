@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" th:href="@{/css/edutrack.css}">
     <meta charset="UTF-8">
     <title>My Grades - EduTrack</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -129,21 +130,21 @@
 <body>
 
 <div class="barre-laterale">
-    <div class="logo-mini">🎓</div>
-    <a th:href="@{/accueil}" class="icone-nav">🏠<span class="infobulle">Home</span></a>
-    <a th:href="@{/mes-notes}" class="icone-nav actif">📊<span class="infobulle">My Grades</span></a>
-    <a th:href="@{/profil}" class="icone-nav">👤<span class="infobulle">My Profile</span></a>
+    <div class="logo-mini">ðŸŽ“</div>
+    <a th:href="@{/accueil}" class="icone-nav">ðŸ <span class="infobulle">Home</span></a>
+    <a th:href="@{/mes-notes}" class="icone-nav actif">ðŸ“Š<span class="infobulle">My Grades</span></a>
+    <a th:href="@{/profil}" class="icone-nav">ðŸ‘¤<span class="infobulle">My Profile</span></a>
     <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
         <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
-            🚪<span class="infobulle">Log out</span>
+            ðŸšª<span class="infobulle">Log out</span>
         </button>
     </form>
 </div>
 
 <div class="zone-principale">
     <div class="barre-haut">
-        <h1>🎓 EduTrack — My Grades</h1>
-        <a th:href="@{/mes-notes/pdf}" class="btn-pdf">📄 Download PDF</a>
+        <h1>ðŸŽ“ EduTrack â€” My Grades</h1>
+        <a th:href="@{/mes-notes/pdf}" class="btn-pdf">ðŸ“„ Download PDF</a>
     </div>
 
     <div class="contenu">
@@ -165,13 +166,13 @@
         <div class="grille-graphiques">
             <div class="panneau anime d2">
                 <div class="panneau-corps">
-                    <p class="section-titre">📈 Average by semester</p>
+                    <p class="section-titre">ðŸ“ˆ Average by semester</p>
                     <canvas id="graphiqueSemestre" height="130"></canvas>
                 </div>
             </div>
             <div class="panneau anime d3">
                 <div class="panneau-corps">
-                    <p class="section-titre">🎯 Grade distribution</p>
+                    <p class="section-titre">ðŸŽ¯ Grade distribution</p>
                     <canvas id="graphiqueDistribution" height="130"></canvas>
                 </div>
             </div>
@@ -179,7 +180,7 @@
 
         <div class="panneau anime d4">
             <div class="panneau-corps">
-                <p class="section-titre">📊 Grade Details</p>
+                <p class="section-titre">ðŸ“Š Grade Details</p>
                 <table>
                     <thead>
                     <tr>
@@ -205,7 +206,7 @@
                     </tr>
                     </tbody>
                 </table>
-                <a th:href="@{/accueil}" class="retour">← Back to home</a>
+                <a th:href="@{/accueil}" class="retour">â† Back to home</a>
             </div>
         </div>
     </div>
@@ -244,7 +245,7 @@
     new Chart(document.getElementById('graphiqueDistribution'), {
         type: 'doughnut',
         data: {
-            labels: ['Good (≥14)', 'Average (10-14)', 'Weak (<10)'],
+            labels: ['Good (â‰¥14)', 'Average (10-14)', 'Weak (<10)'],
             datasets: [{
                 data: [nbBonnes, nbMoyennes, nbFaibles],
                 backgroundColor: ['#15803d', '#d97706', '#b91c1c'],

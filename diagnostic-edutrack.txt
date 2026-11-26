@@ -1,0 +1,1250 @@
+﻿
+========== src\main\java\entity\Annonce.java ==========
+package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "annonces")
+public class Annonce {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 1000)
+    private String contenu;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    public Annonce() {}
+
+    public Annonce(String contenu) {
+        this.contenu = contenu;
+        this.date = LocalDate.now();
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getContenu() { return contenu; }
+    public void setContenu(String contenu) { this.contenu = contenu; }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
+}
+
+========== src\main\java\repository\AnnonceRepository.java ==========
+package com.example.demo.repository;
+
+import com.example.demo.entity.Annonce;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface AnnonceRepository extends JpaRepository<Annonce, Long> {
+    List<Annonce> findAllByOrderByDateDesc();
+}
+
+========== src\main\java\controller\PageController.java ==========
+package com.example.demo.controller;
+
+import com.example.demo.entity.Note;
+import com.example.demo.entity.Presence;
+import com.example.demo.entity.Seance;
+import com.example.demo.entity.Utilisateur;
+import com.example.demo.repository.AnnonceRepository;
+import com.example.demo.repository.PresenceRepository;
+import com.example.demo.repository.ProfesseurRepository;
+import com.example.demo.repository.SeanceRepository;
+import com.example.demo.repository.UtilisateurRepository;
+import com.example.demo.service.InscriptionService;
+import com.example.demo.service.NoteService;
+import com.example.demo.service.PdfService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+@Controller
+public class PageController {
+
+    @Autowired
+    private InscriptionService inscriptionService;
+
+    @Autowired
+    private NoteService noteService;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
+    private PresenceRepository presenceRepository;
+
+    @Autowired
+    private ProfesseurRepository professeurRepository;
+
+    @Autowired
+    private AnnonceRepository annonceRepository;
+
+    @Autowired
+    private SeanceRepository seanceRepository;
+
+    @Autowired
+    private PdfService pdfService;
+
+    private static final String[] PHOTOS_CAMPUS = {
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=1600&q=80"
+    };
+
+    @GetMapping("/")
+    public String racine() {
+        return "landing";
+    }
+
+    @GetMapping("/login")
+    public String pageLogin(@RequestParam(required = false) String erreur,
+                            @RequestParam(required = false) String deconnecte,
+                            Model model) {
+        if (erreur != null) {
+            model.addAttribute("erreur", "Incorrect email or password.");
+        }
+        if (deconnecte != null) {
+            model.addAttribute("info", "You have been logged out.");
+        }
+        return "login";
+    }
+
+    @GetMapping("/inscription")
+    public String pageInscription() {
+        return "inscription";
+    }
+
+    @PostMapping("/inscription")
+    public String traiterInscription(@RequestParam String email,
+                                     @RequestParam String motDePasse,
+                                     @RequestParam String nom,
+                                     @RequestParam String prenom,
+                                     Model model) {
+        try {
+            inscriptionService.inscrire(email, motDePasse, nom, prenom);
+            return "redirect:/login?inscrit=true";
+        } catch (IllegalStateException e) {
+            model.addAttribute("erreur", e.getMessage());
+            return "inscription";
+        }
+    }
+
+    @GetMapping("/accueil")
+    public String pageAccueil(Authentication authentication,
+                              @RequestParam(required = false, defaultValue = "1") Integer semestre,
+                              Model model) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+        List<Note> notes = noteService.getNotesDeEleve(utilisateur);
+
+        model.addAttribute("email", authentication.getName());
+        model.addAttribute("utilisateur", utilisateur);
+
+        double cgpa = notes.stream()
+                .mapToDouble(Note::getValeur)
+                .average()
+                .orElse(0.0) / 2.0;
+        model.addAttribute("cgpa", Math.round(cgpa * 100.0) / 100.0);
+
+        Map<Integer, Double> sgpaParSemestre = notes.stream()
+                .collect(Collectors.groupingBy(
+                        n -> n.getMatiere().getSemestre(),
+                        TreeMap::new,
+                        Collectors.averagingDouble(n -> n.getValeur() / 2.0)
+                ));
+        model.addAttribute("sgpaParSemestre", sgpaParSemestre);
+
+        List<Presence> presences = presenceRepository.findByEleve(utilisateur);
+        int pourcentagePresence = 0;
+        if (!presences.isEmpty()) {
+            long nbPresent = presences.stream().filter(Presence::getPresent).count();
+            pourcentagePresence = (int) Math.round((nbPresent * 100.0) / presences.size());
+        }
+        model.addAttribute("pourcentagePresence", pourcentagePresence);
+
+        boolean estAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        model.addAttribute("estAdmin", estAdmin);
+
+        model.addAttribute("professeurs", professeurRepository.findAll());
+        model.addAttribute("annonces", annonceRepository.findAllByOrderByDateDesc());
+
+        Note derniereNote = notes.stream()
+                .max(Comparator.comparing(Note::getDate))
+                .orElse(null);
+        model.addAttribute("derniereNote", derniereNote);
+
+        boolean notificationRecente = derniereNote != null
+                && ChronoUnit.DAYS.between(derniereNote.getDate(), LocalDate.now()) <= 3;
+        model.addAttribute("notificationRecente", notificationRecente);
+
+        int indexJour = LocalDate.now().getDayOfYear() % PHOTOS_CAMPUS.length;
+        model.addAttribute("photoBanniere", PHOTOS_CAMPUS[indexJour]);
+
+        model.addAttribute("seances", seanceRepository.findBySemestreOrderByJourAscHeureDebutAsc(semestre));
+        model.addAttribute("semestreActuel", semestre);
+        model.addAttribute("semestres", IntStream.rangeClosed(1, 6).boxed().collect(Collectors.toList()));
+
+        return "accueil";
+    }
+
+    @GetMapping("/admin")
+    public String pageAdmin() {
+        return "redirect:/admin/notes";
+    }
+
+    @GetMapping("/mes-notes")
+    public String pageMesNotes(Authentication authentication, Model model) {
+        Utilisateur eleve = utilisateurRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+        List<Note> notes = noteService.getNotesDeEleve(eleve);
+
+        model.addAttribute("notes", notes);
+        model.addAttribute("email", authentication.getName());
+        model.addAttribute("utilisateur", eleve);
+
+        double moyenneGenerale = notes.stream()
+                .mapToDouble(Note::getValeur)
+                .average()
+                .orElse(0.0);
+        model.addAttribute("moyenneGenerale", moyenneGenerale);
+
+        Map<Integer, Double> moyennesParSemestre = notes.stream()
+                .collect(Collectors.groupingBy(
+                        n -> n.getMatiere().getSemestre(),
+                        TreeMap::new,
+                        Collectors.averagingDouble(Note::getValeur)
+                ));
+        model.addAttribute("moyennesParSemestre", moyennesParSemestre);
+
+        long nbBonnes = notes.stream().filter(n -> n.getValeur() >= 14).count();
+        long nbMoyennes = notes.stream().filter(n -> n.getValeur() >= 10 && n.getValeur() < 14).count();
+        long nbFaibles = notes.stream().filter(n -> n.getValeur() < 10).count();
+        model.addAttribute("nbBonnes", nbBonnes);
+        model.addAttribute("nbMoyennes", nbMoyennes);
+        model.addAttribute("nbFaibles", nbFaibles);
+
+        return "mes-notes";
+    }
+
+    @GetMapping("/mes-notes/pdf")
+    public ResponseEntity<byte[]> telechargerReleveNotes(Authentication authentication) {
+        Utilisateur eleve = utilisateurRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+        List<Note> notes = noteService.getNotesDeEleve(eleve);
+
+        double moyenneGenerale = notes.stream()
+                .mapToDouble(Note::getValeur)
+                .average()
+                .orElse(0.0);
+
+        byte[] pdf = pdfService.genererReleveNotes(eleve, notes, moyenneGenerale);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "grade-report-" + eleve.getNom() + ".pdf");
+
+        return ResponseEntity.ok().headers(headers).body(pdf);
+    }
+
+    @GetMapping("/profil")
+    public String pageProfil(Authentication authentication, Model model) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+        model.addAttribute("utilisateur", utilisateur);
+        return "profil";
+    }
+
+    @PostMapping("/profil/photo")
+    public String uploaderPhoto(Authentication authentication,
+                                @RequestParam MultipartFile photo) throws Exception {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (!photo.isEmpty()) {
+            String base64 = Base64.getEncoder().encodeToString(photo.getBytes());
+            String mimeType = photo.getContentType();
+            utilisateur.setPhotoBase64("data:" + mimeType + ";base64," + base64);
+            utilisateurRepository.save(utilisateur);
+        }
+
+        return "redirect:/profil?succes=true";
+    }
+
+    @GetMapping("/emploi-du-temps")
+    public String redirectionEmploiDuTemps() {
+        return "redirect:/accueil";
+    }
+
+    @GetMapping("/admin/notes")
+    public String pageAdminNotes(Authentication authentication, Model model) {
+        model.addAttribute("email", authentication.getName());
+        model.addAttribute("eleves", noteService.getTousLesEleves());
+        model.addAttribute("matieres", noteService.getToutesLesMatieres());
+        model.addAttribute("notes", noteService.getToutesLesNotes());
+        model.addAttribute("moyenneClasse", Math.round(noteService.getMoyenneGeneraleClasse() * 100.0) / 100.0);
+        model.addAttribute("topEleves", noteService.getTopEleves(5));
+        return "admin-notes";
+    }
+
+    @PostMapping("/admin/notes")
+    public String ajouterNote(@RequestParam Long eleveId,
+                              @RequestParam Long matiereId,
+                              @RequestParam Double valeur,
+                              @RequestParam String typeExamen,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            noteService.ajouterNote(eleveId, matiereId, valeur, typeExamen);
+            return "redirect:/admin/notes?succes=true";
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("erreur", e.getMessage());
+            return "redirect:/admin/notes";
+        }
+    }
+
+    @PostMapping("/admin/notes/{id}/modifier")
+    public String modifierNote(@PathVariable Long id,
+                               @RequestParam Double valeur,
+                               @RequestParam String typeExamen,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            noteService.modifierNote(id, valeur, typeExamen);
+            redirectAttributes.addFlashAttribute("succesMessage", "Grade updated successfully.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/admin/notes";
+    }
+
+    @PostMapping("/admin/notes/{id}/supprimer")
+    public String supprimerNote(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            noteService.supprimerNote(id);
+            redirectAttributes.addFlashAttribute("succesMessage", "Grade deleted.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/admin/notes";
+    }
+
+    @PostMapping("/admin/eleves/{id}/supprimer")
+    public String supprimerEleve(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            noteService.supprimerEleve(id);
+            redirectAttributes.addFlashAttribute("succesMessage", "Student deleted.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/admin/notes";
+    }
+}
+
+========== src\main\java\config\SecurityConfig.java ==========
+package com.example.demo.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/inscription", "/css/**", "/images/**", "/favicon.svg").permitAll()
+                        .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/mes-notes").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .successHandler((request, response, authentication) -> {
+                            boolean estAdmin = authentication.getAuthorities().stream()
+                                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                            response.sendRedirect(estAdmin ? "/admin/notes" : "/accueil");
+                        })
+                        .failureUrl("/login?erreur=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/deconnexion")
+                        .logoutSuccessUrl("/login?deconnecte=true")
+                        .permitAll()
+                );
+
+        return http.build();
+    }
+}
+
+========== src\main\resources\templates\admin-notes.html ==========
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - EduTrack</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: #f0f1ed;
+            padding: 0 0 3rem;
+        }
+        .barre-haut {
+            background: #1e3a5f;
+            padding: 1.1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        .barre-haut .titre {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-weight: 700; font-size: 1.15rem; font-family: Georgia, serif;
+        }
+        .barre-haut .droite { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; }
+        .barre-haut .droite span { opacity: 0.85; }
+        .btn-deconnexion {
+            background: rgba(220,38,38,0.15); color: #fca5a5; border: 1px solid rgba(220,38,38,0.3);
+            padding: 0.5rem 1rem; border-radius: 3px; font-size: 0.82rem; cursor: pointer; font-weight: 700;
+        }
+        .btn-deconnexion:hover { background: rgba(220,38,38,0.25); }
+
+        .page { width: 100%; max-width: 1150px; margin: 0 auto; padding: 0 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+        .stats-rapides {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .carte-stat-admin {
+            background: white; border-radius: 4px; border-top: 3px solid #d4af37;
+            padding: 1.2rem 1.5rem; box-shadow: 0 2px 8px rgba(15,32,56,0.08);
+        }
+        .carte-stat-admin .valeur-admin { font-size: 1.7rem; font-weight: 700; color: #1e3a5f; }
+        .carte-stat-admin .libelle-admin { font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem; }
+
+        .carte {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(15,32,56,0.08);
+            overflow: hidden;
+            border-top: 3px solid #d4af37;
+        }
+        .entete {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.3rem 2rem;
+        }
+        .entete h1 { margin: 0; font-size: 1.1rem; font-family: Georgia, serif; font-weight: 700; }
+
+        .corps { padding: 1.2rem 2rem 1.5rem; }
+        .info { color: #15803d; font-size: 0.85rem; margin-bottom: 1rem; }
+        .erreur { color: #b91c1c; font-size: 0.85rem; margin-bottom: 1rem; }
+
+        input.recherche {
+            width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #d8d8d3;
+            border-radius: 3px; font-size: 0.88rem; margin-bottom: 0.8rem;
+            box-sizing: border-box;
+        }
+        input.recherche:focus { outline: none; border-color: #1e3a5f; }
+
+        label {
+            display: block; margin-top: 0.9rem; font-size: 0.8rem; color: #444;
+            text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+        }
+        select, input[type="number"], input[type="text"] {
+            width: 100%; padding: 0.7rem; border: 1px solid #d8d8d3;
+            border-radius: 3px; box-sizing: border-box; font-size: 0.95rem;
+            margin-top: 0.35rem;
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        select:focus, input:focus { outline: none; border-color: #1e3a5f; }
+        button.submit {
+            margin-top: 1.4rem; width: 100%; padding: 0.8rem;
+            background: #1e3a5f;
+            color: white; border: none; border-radius: 3px;
+            font-size: 0.9rem; cursor: pointer; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        button.submit:hover { background: #14263f; }
+
+        .listes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 800px) {
+            .listes { grid-template-columns: 1fr; }
+        }
+
+        .tableau-scroll {
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 3px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead th {
+            position: sticky; top: 0;
+            background: #eef2f7; text-align: left;
+            padding: 0.6rem 0.7rem; color: #1e3a5f; font-weight: 700;
+        }
+        tbody td { padding: 0.5rem 0.7rem; border-top: 1px solid #eef1f4; color: #333; vertical-align: middle; }
+        tbody tr:hover { background: #f8fafc; }
+        .badge {
+            display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px;
+            background: #eef2f7; color: #1e3a5f; font-size: 0.72rem; font-weight: 700;
+            border: 1px solid #d4af37;
+        }
+        .rang {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #eef2f7; color: #1e3a5f; font-weight: 700; font-size: 0.78rem;
+            margin-right: 0.5rem;
+        }
+        .rang.or { background: #fef3c7; color: #92400e; }
+        .rang.argent { background: #e5e7eb; color: #374151; }
+        .rang.bronze { background: #fed7aa; color: #9a3412; }
+
+        .ligne-actions { display: flex; gap: 0.4rem; }
+        .btn-petit {
+            padding: 0.35rem 0.6rem; border-radius: 3px; border: none;
+            font-size: 0.75rem; cursor: pointer; font-weight: 700;
+        }
+        .btn-modifier { background: #eef2f7; color: #1e3a5f; }
+        .btn-modifier:hover { background: #dce4ee; }
+        .btn-supprimer { background: #fee2e2; color: #b91c1c; }
+        .btn-supprimer:hover { background: #fecaca; }
+        .form-note-inline input { width: 60px; padding: 0.3rem; font-size: 0.78rem; margin: 0; display: inline-block; }
+        .form-note-inline input[type="text"] { width: 100px; }
+        .form-note-inline { display: flex; gap: 0.3rem; align-items: center; }
+    </style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"></head>
+<body>
+
+<div class="barre-haut">
+    <div class="titre">ðŸŽ“ EduTrack â€” Admin Panel</div>
+    <div class="droite">
+        <a href="/admin/professeurs" style="color:#fff;font-weight:600;text-decoration:none;">Faculty photos</a><a href="/profil" style="color:#fff;font-weight:600;text-decoration:none;">My profile</a><span th:text="${email}"></span>
+        <form th:action="@{/deconnexion}" method="post" style="margin:0;">
+            <button type="submit" class="btn-deconnexion">Log out</button>
+        </form>
+    </div>
+</div>
+
+<div class="page">
+
+    <p class="info" th:if="${succesMessage}" th:text="${succesMessage}"></p>
+    <p class="erreur" th:if="${erreur}" th:text="${erreur}"></p>
+
+    <div class="stats-rapides">
+        <div class="carte-stat-admin">
+            <div class="valeur-admin" th:text="${moyenneClasse} + ' / 20'"></div>
+            <div class="libelle-admin">Class average</div>
+        </div>
+        <div class="carte-stat-admin">
+            <div class="valeur-admin" th:text="${#lists.size(eleves)}"></div>
+            <div class="libelle-admin">Enrolled students</div>
+        </div>
+        <div class="carte-stat-admin">
+            <div class="valeur-admin" th:text="${#lists.size(notes)}"></div>
+            <div class="libelle-admin">Grades recorded</div>
+        </div>
+    </div>
+
+    <div class="carte">
+        <div class="entete"><h1>ðŸ† Top 5 Students</h1></div>
+        <div class="corps">
+            <div class="tableau-scroll" style="max-height: none;">
+                <table>
+                    <thead>
+                    <tr><th>Rank</th><th>Student</th><th>Average</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entree, iter : ${topEleves}">
+                        <td>
+                            <span class="rang" th:classappend="${iter.index == 0} ? 'or' : (${iter.index == 1} ? 'argent' : (${iter.index == 2} ? 'bronze' : ''))"
+                                  th:text="${iter.index + 1}"></span>
+                        </td>
+                        <td th:text="${entree.key.prenom} + ' ' + ${entree.key.nom}"></td>
+                        <td th:text="${#numbers.formatDecimal(entree.value, 1, 2)} + ' / 20'"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(topEleves)}">
+                        <td colspan="3">No grades recorded yet.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="listes">
+        <div class="carte">
+            <div class="entete"><h1>ðŸ‘¥ Students (<span th:text="${#lists.size(eleves)}"></span>)</h1></div>
+            <div class="corps">
+                <input type="text" class="recherche" placeholder="Search a student..." onkeyup="filtrer(this, 'table-eleves')">
+                <div class="tableau-scroll">
+                    <table id="table-eleves">
+                        <thead>
+                        <tr><th>Last name</th><th>First name</th><th>Email</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="eleve : ${eleves}">
+                            <td th:text="${eleve.nom}"></td>
+                            <td th:text="${eleve.prenom}"></td>
+                            <td th:text="${eleve.email}"></td>
+                            <td>
+                                <form th:if="${eleve.role != 'ROLE_ADMIN'}"
+                                      th:action="@{'/admin/eleves/' + ${eleve.id} + '/supprimer'}"
+                                      method="post" style="margin:0;"
+                                      onsubmit="return confirm('Delete this student and all their grades?');">
+                                    <button type="submit" class="btn-petit btn-supprimer">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="carte">
+            <div class="entete"><h1>ðŸ“š Subjects (<span th:text="${#lists.size(matieres)}"></span>)</h1></div>
+            <div class="corps">
+                <input type="text" class="recherche" placeholder="Search a subject..." onkeyup="filtrer(this, 'table-matieres')">
+                <div class="tableau-scroll">
+                    <table id="table-matieres">
+                        <thead>
+                        <tr><th>Name</th><th>Semester</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="matiere : ${matieres}">
+                            <td th:text="${matiere.nom}"></td>
+                            <td><span class="badge" th:text="'S' + ${matiere.semestre}"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="carte">
+        <div class="entete"><h1>ðŸ“Š Recorded Grades (<span th:text="${#lists.size(notes)}"></span>)</h1></div>
+        <div class="corps">
+            <input type="text" class="recherche" placeholder="Search a grade (student, subject)..." onkeyup="filtrer(this, 'table-notes')">
+            <div class="tableau-scroll">
+                <table id="table-notes">
+                    <thead>
+                    <tr><th>Student</th><th>Subject</th><th>Type</th><th>Grade</th><th>Date</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="note : ${notes}">
+                        <td th:text="${note.eleve.email}"></td>
+                        <td th:text="${note.matiere.nom}"></td>
+                        <td th:text="${note.typeExamen}"></td>
+                        <td th:text="${note.valeur}"></td>
+                        <td th:text="${note.date}"></td>
+                        <td>
+                            <div class="ligne-actions">
+                                <form th:action="@{'/admin/notes/' + ${note.id} + '/modifier'}" method="post" class="form-note-inline">
+                                    <input type="number" name="valeur" th:value="${note.valeur}" min="0" max="20" step="0.5" required>
+                                    <input type="text" name="typeExamen" th:value="${note.typeExamen}" required>
+                                    <button type="submit" class="btn-petit btn-modifier">Update</button>
+                                </form>
+                                <form th:action="@{'/admin/notes/' + ${note.id} + '/supprimer'}" method="post" style="margin:0;"
+                                      onsubmit="return confirm('Delete this grade?');">
+                                    <button type="submit" class="btn-petit btn-supprimer">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="carte" style="max-width: 480px; margin: 0 auto; width: 100%;">
+        <div class="entete">
+            <h1>ðŸ“ Add a Grade</h1>
+        </div>
+        <div class="corps">
+            <p class="info" th:if="${param.succes}">Grade added successfully!</p>
+            <form th:action="@{/admin/notes}" method="post">
+                <label for="eleveId">Student</label>
+                <select id="eleveId" name="eleveId" required>
+                    <option value="" disabled selected>-- Select a student --</option>
+                    <option th:each="eleve : ${eleves}"
+                            th:value="${eleve.id}"
+                            th:text="${eleve.email}"></option>
+                </select>
+                <label for="matiereId">Subject</label>
+                <select id="matiereId" name="matiereId" required>
+                    <option value="" disabled selected>-- Select a subject --</option>
+                    <option th:each="matiere : ${matieres}"
+                            th:value="${matiere.id}"
+                            th:text="${matiere.nom}"></option>
+                </select>
+                <label for="typeExamen">Exam type</label>
+                <input type="text" id="typeExamen" name="typeExamen" placeholder="E.g.: Quiz 1, Final exam..." required>
+                <label for="valeur">Grade (out of 20)</label>
+                <input type="number" id="valeur" name="valeur" min="0" max="20" step="0.5" required>
+                <button type="submit" class="submit">Add grade</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function filtrer(champ, idTable) {
+        var texte = champ.value.toLowerCase();
+        var table = document.getElementById(idTable);
+        var lignes = table.getElementsByTagName('tr');
+        for (var i = 1; i < lignes.length; i++) {
+            var contenu = lignes[i].textContent.toLowerCase();
+            lignes[i].style.display = contenu.indexOf(texte) > -1 ? '' : 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
+
+========== src\main\resources\templates\accueil.html ==========
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - EduTrack</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .enveloppe { display: flex; flex: 1; }
+        .barre-laterale {
+            width: 68px;
+            background: #1e3a5f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.2rem 0;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }
+        .barre-laterale .logo-mini { font-size: 1.6rem; margin-bottom: 1rem; }
+        .icone-nav {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: white; text-decoration: none;
+            position: relative;
+        }
+        .icone-nav:hover { background: rgba(212,175,55,0.2); }
+        .icone-nav.actif { background: #d4af37; }
+        .icone-nav .infobulle {
+            position: absolute; left: 56px; top: 50%; transform: translateY(-50%);
+            background: #1a1a1a; color: white; font-size: 0.75rem;
+            padding: 0.4rem 0.7rem; border-radius: 6px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.15s;
+            z-index: 10;
+        }
+        .icone-nav:hover .infobulle { opacity: 1; }
+        .icone-nav.deconnexion { margin-top: auto; }
+        .badge-notif {
+            position: absolute; top: 2px; right: 2px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #dc2626; border: 2px solid #1e3a5f;
+        }
+
+        .zone-principale { flex: 1; min-width: 0; }
+        .barre-haut {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .barre-haut h1 {
+            margin: 0; font-size: 1.2rem; font-family: Georgia, serif;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .barre-haut .droite { display: flex; align-items: center; gap: 1rem; position: relative; }
+        .photo-mini {
+            width: 38px; height: 38px; border-radius: 50%;
+            object-fit: cover; border: 2px solid #d4af37; cursor: pointer;
+        }
+        .photo-mini-vide {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(212,175,55,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer;
+        }
+        .menu-profil {
+            position: absolute; top: 52px; right: 0;
+            background: white; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 200px; overflow: hidden; display: none; z-index: 50;
+        }
+        .menu-profil.ouvert { display: block; }
+        .menu-profil a, .menu-profil button {
+            display: block; width: 100%; text-align: left; padding: 0.8rem 1.1rem;
+            font-size: 0.88rem; color: #1a1a1a; text-decoration: none; border: none;
+            background: white; cursor: pointer; font-family: inherit;
+            border-bottom: 1px solid #f0f1ed;
+        }
+        .menu-profil a:hover, .menu-profil button:hover { background: #f4f5f7; }
+        .menu-profil button.deco { color: #b91c1c; font-weight: 600; border-bottom: none; }
+
+        .banniere {
+            height: 200px;
+            background-size: cover;
+            background-position: center 30%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        .banniere h2 { margin: 0 0 0.3rem; font-size: 1.6rem; font-family: Georgia, serif; }
+        .banniere p { margin: 0; opacity: 0.9; font-size: 0.9rem; }
+
+        .contenu { max-width: 1000px; margin: -50px auto 0; padding: 0 1.5rem 1.5rem; position: relative; z-index: 1; }
+        .grille-cartes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .carte-stat {
+            background: white;
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 24px rgba(15,32,56,0.12);
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+        .carte-stat .icone-stat {
+            width: 42px; height: 42px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+            background: #eef2f7;
+        }
+        .carte-stat .valeur { font-size: 1.4rem; font-weight: 700; color: #1e3a5f; }
+        .carte-stat .libelle { font-size: 0.78rem; color: #6b7280; }
+        .grille-principale {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 750px) {
+            .grille-principale { grid-template-columns: 1fr; }
+        }
+        .panneau {
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #eef0ee;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06);
+        }
+        .panneau h2 {
+            margin: 0 0 1rem; font-size: 1rem; color: #1e3a5f;
+            font-family: Georgia, serif;
+        }
+        .anneau-conteneur { display: flex; flex-direction: column; align-items: center; }
+        .anneau {
+            width: 140px; height: 140px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .anneau-centre {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: white;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .anneau-centre .pourcentage { font-size: 1.5rem; font-weight: 700; color: #1e3a5f; }
+        .anneau-centre .texte { font-size: 0.7rem; color: #6b7280; }
+        .avertissement {
+            margin-top: 1rem; padding: 0.6rem 0.9rem;
+            background: #fef2f2; color: #b91c1c;
+            border-radius: 8px; font-size: 0.78rem; text-align: center;
+        }
+        .liens-rapides { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.5rem; }
+        .lien-rapide {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.7rem 0.9rem; border-radius: 8px;
+            text-decoration: none; color: #1e3a5f; font-size: 0.9rem; font-weight: 600;
+            border: 1px solid #eef0ee; background: #fafbfa;
+        }
+        .lien-rapide:hover { background: #eef2f7; }
+
+        .section-generique { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 1.5rem; }
+        .section-generique h2 {
+            font-size: 1.1rem; color: #1e3a5f; font-family: Georgia, serif;
+            margin-bottom: 1rem;
+        }
+
+        .selecteur-semestre { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .bouton-semestre {
+            padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #d8d8d3;
+            background: white; color: #1e3a5f; font-size: 0.82rem; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+        }
+        .bouton-semestre.actif { background: #1e3a5f; color: white; border-color: #1e3a5f; }
+        .bouton-semestre:hover { border-color: #1e3a5f; }
+        .carte-emploi {
+            background: white; border-radius: 10px; border: 1px solid #eef0ee;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06); overflow: hidden;
+        }
+        table.emploi { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+        table.emploi thead th {
+            background: #eef2f7; text-align: left;
+            padding: 0.7rem 1rem; color: #1e3a5f; font-weight: 700;
+        }
+        table.emploi tbody td { padding: 0.7rem 1rem; border-top: 1px solid #eef1f4; color: #333; }
+        table.emploi tbody tr:hover { background: #f8fafc; }
+        .badge-jour {
+            display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
+            background: #eef2f7; color: #1e3a5f; font-size: 0.75rem; font-weight: 700;
+        }
+        .vide-emploi { padding: 2rem; text-align: center; color: #888; font-size: 0.88rem; }
+
+        .section-profs { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+        .section-profs h2 {
+            font-size: 1.1rem; color: #1e3a5f; font-family: Georgia, serif;
+            margin-bottom: 1rem;
+        }
+        .carrousel-conteneur {
+            overflow: hidden;
+            border-radius: 10px;
+            border: 1px solid #eef0ee;
+            box-shadow: 0 4px 16px rgba(15,32,56,0.06);
+            padding: 1.2rem 0;
+        }
+        .carrousel-piste {
+            display: flex;
+            gap: 1.2rem;
+            animation: defilement 25s linear infinite;
+            width: max-content;
+        }
+        .carrousel-conteneur:hover .carrousel-piste { animation-play-state: paused; }
+        @keyframes defilement {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .carte-prof {
+            width: 170px; flex-shrink: 0; text-align: center;
+            padding: 0 1rem;
+        }
+        .carte-prof img {
+            width: 84px; height: 84px; border-radius: 50%;
+            object-fit: cover; border: 3px solid #d4af37; margin-bottom: 0.6rem;
+        }
+        .carte-prof .nom-prof { font-weight: 700; font-size: 0.88rem; color: #1a1a1a; }
+        .carte-prof .specialite-prof { font-size: 0.75rem; color: #888; margin-top: 0.2rem; }
+
+        .fond-popup {
+            position: fixed; inset: 0; background: rgba(15,32,56,0.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; padding: 1rem;
+        }
+        .popup {
+            background: white; border-radius: 12px; width: 100%; max-width: 440px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;
+        }
+        .popup-entete {
+            background: #1e3a5f; color: white; padding: 1.1rem 1.4rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .popup-entete h3 { margin: 0; font-size: 1.05rem; font-family: Georgia, serif; }
+        .popup-fermer {
+            background: none; border: none; color: white; font-size: 1.2rem;
+            cursor: pointer; opacity: 0.8;
+        }
+        .popup-fermer:hover { opacity: 1; }
+        .popup-corps { padding: 1.4rem; }
+        .popup-ligne {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.6rem 0; border-bottom: 1px solid #f0f1ed; font-size: 0.9rem;
+        }
+        .popup-ligne:last-child { border-bottom: none; }
+        .popup-ligne .libelle-popup { color: #666; }
+        .popup-ligne .valeur-popup { font-weight: 700; color: #1e3a5f; }
+        .popup-alerte {
+            background: #fef2f2; color: #b91c1c; padding: 0.7rem 0.9rem;
+            border-radius: 8px; font-size: 0.82rem; margin-top: 0.8rem;
+        }
+        .popup-annonce {
+            background: #eef2f7; padding: 0.8rem 0.9rem; border-radius: 8px;
+            font-size: 0.85rem; color: #333; margin-top: 1rem;
+        }
+
+        .pied-page {
+            background: #14263f; color: rgba(255,255,255,0.75);
+            padding: 2rem; text-align: center; font-size: 0.82rem;
+        }
+        .pied-page .liens-pied { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+        .pied-page a { color: #d4af37; text-decoration: none; }
+        .pied-page a:hover { text-decoration: underline; }
+    </style>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" th:href="@{/css/theme.css}"><link rel="icon" type="image/svg+xml" href="/favicon.svg"></head>
+<body>
+
+<div class="fond-popup" id="fondPopup">
+    <div class="popup">
+        <div class="popup-entete">
+            <h3>ðŸ‘‹ Welcome to EduTrack</h3>
+            <button class="popup-fermer" onclick="document.getElementById('fondPopup').style.display='none'">âœ•</button>
+        </div>
+        <div class="popup-corps">
+            <div class="popup-ligne">
+                <span class="libelle-popup">Current CGPA</span>
+                <span class="valeur-popup" th:text="${cgpa} + ' / 10'"></span>
+            </div>
+            <div class="popup-ligne">
+                <span class="libelle-popup">Attendance</span>
+                <span class="valeur-popup" th:text="${pourcentagePresence} + '%'"></span>
+            </div>
+            <div class="popup-ligne" th:if="${derniereNote != null}">
+                <span class="libelle-popup">Latest grade added</span>
+                <span class="valeur-popup" th:text="${derniereNote.matiere.nom} + ': ' + ${derniereNote.valeur} + '/20'"></span>
+            </div>
+            <p class="popup-alerte" th:if="${pourcentagePresence < 80 and pourcentagePresence > 0}">
+                âš ï¸ Your attendance is below 80%.
+            </p>
+            <div class="popup-annonce" th:each="annonce : ${annonces}">
+                ðŸ“¢ <span th:text="${annonce.contenu}"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="enveloppe">
+    <div class="barre-laterale">
+        <div class="logo-mini">ðŸŽ“</div>
+        <a th:href="@{/accueil}" class="icone-nav actif">ðŸ <span class="infobulle">Home</span></a>
+        <a th:href="@{/mes-notes}" class="icone-nav">
+            ðŸ“Š<span class="infobulle">My Grades</span>
+            <span th:if="${notificationRecente}" class="badge-notif"></span>
+        </a>
+        <a th:href="@{/profil}" class="icone-nav">ðŸ‘¤<span class="infobulle">My Profile</span></a>
+        <a th:if="${estAdmin}" th:href="@{/admin/notes}" class="icone-nav">ðŸ”<span class="infobulle">Admin Panel</span></a>
+        <form th:action="@{/deconnexion}" method="post" class="icone-nav deconnexion" style="border:none; background:none; padding:0;">
+            <button type="submit" style="all:unset; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:10px;" onmouseover="this.style.background='rgba(220,38,38,0.25)'" onmouseout="this.style.background='none'">
+                ðŸšª<span class="infobulle">Log out</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="zone-principale">
+        <div class="barre-haut">
+            <h1>ðŸŽ“ EduTrack</h1>
+            <div class="droite">
+                <span th:text="${email}"></span>
+                <img th:if="${utilisateur.photoBase64 != null}" th:src="${utilisateur.photoBase64}" class="photo-mini" onclick="document.getElementById('menuProfil').classList.toggle('ouvert')">
+                <div th:if="${utilisateur.photoBase64 == null}" class="photo-mini-vide" onclick="document.getElementById('menuProfil').classList.toggle('ouvert')">ðŸ‘¤</div>
+                <div class="menu-profil" id="menuProfil">
+                    <a th:href="@{/profil}">ðŸ‘¤ My Profile</a>
+                    <a th:href="@{/mes-notes}">ðŸ“Š My Grades</a>
+                    <form th:action="@{/deconnexion}" method="post" style="margin:0;">
+                        <button type="submit" class="deco">ðŸšª Log out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="banniere" th:style="'background-image: linear-gradient(rgba(15,32,56,0.55), rgba(15,32,56,0.7)), url(' + ${photoBanniere} + ')'">
+            <h2 th:text="'Welcome, ' + ${utilisateur.prenom} + '!'"></h2>
+            <p>Here's an overview of your academic progress</p>
+        </div>
+        <div class="contenu">
+            <div class="grille-cartes">
+                <div class="carte-stat">
+                    <div class="icone-stat">ðŸ“ˆ</div>
+                    <div>
+                        <div class="valeur" th:text="${cgpa}"></div>
+                        <div class="libelle">CGPA (out of 10)</div>
+                    </div>
+                </div>
+                <div class="carte-stat">
+                    <div class="icone-stat">ðŸ“š</div>
+                    <div>
+                        <div class="valeur" th:text="${#maps.size(sgpaParSemestre)}"></div>
+                        <div class="libelle">Semesters tracked</div>
+                    </div>
+                </div>
+                <div class="carte-stat">
+                    <div class="icone-stat">ðŸ—“ï¸</div>
+                    <div>
+                        <div class="valeur" th:text="${pourcentagePresence} + '%'"></div>
+                        <div class="libelle">Attendance</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grille-principale">
+                <div class="panneau">
+                    <h2>Results by semester</h2>
+                    <canvas id="graphiqueResultats" height="110"></canvas>
+                </div>
+                <div class="panneau">
+                    <h2>Attendance</h2>
+                    <div class="anneau-conteneur">
+                        <div class="anneau" th:style="'background: conic-gradient(#1e3a5f ' + ${pourcentagePresence} + '%, #eef0ee 0)'">
+                            <div class="anneau-centre">
+                                <div class="pourcentage" th:text="${pourcentagePresence} + '%'"></div>
+                                <div class="texte">Attendance</div>
+                            </div>
+                        </div>
+                        <p class="avertissement" th:if="${pourcentagePresence < 80 and pourcentagePresence > 0}">
+                            âš ï¸ Attendance below 80%
+                        </p>
+                    </div>
+                    <div class="liens-rapides">
+                        <a th:href="@{/mes-notes}" class="lien-rapide">ðŸ“Š View my grades</a>
+                        <a th:href="@{/profil}" class="lien-rapide">ðŸ‘¤ My profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-generique">
+            <h2>ðŸ—“ï¸ Class Schedule</h2>
+            <div class="selecteur-semestre">
+                <a th:each="s : ${semestres}"
+                   th:href="@{/accueil(semestre=${s})}"
+                   th:text="'Semester ' + ${s}"
+                   th:class="${s == semestreActuel} ? 'bouton-semestre actif' : 'bouton-semestre'"></a>
+            </div>
+            <div class="carte-emploi">
+                <table class="emploi" th:if="${not #lists.isEmpty(seances)}">
+                    <thead>
+                    <tr><th>Day</th><th>Time</th><th>Subject</th><th>Room</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="seance : ${seances}">
+                        <td><span class="badge-jour" th:text="${seance.jour}"></span></td>
+                        <td th:text="${seance.heureDebut} + ' - ' + ${seance.heureFin}"></td>
+                        <td th:text="${seance.matiere.nom}"></td>
+                        <td th:text="${seance.salle}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="vide-emploi" th:if="${#lists.isEmpty(seances)}">
+                    No classes scheduled for this semester.
+                </div>
+            </div>
+        </div>
+
+        <div class="section-profs">
+            <h2>ðŸ‘¨â€ðŸ« Our Faculty</h2>
+            <div class="carrousel-conteneur">
+                <div class="carrousel-piste">
+                    <div class="carte-prof" th:each="prof : ${professeurs}">
+                        <img th:src="${prof.photoBase64 != null} ? ${prof.photoBase64} : ${prof.photoUrl}" alt="Teacher photo">
+                        <div class="nom-prof" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
+                        <div class="specialite-prof" th:text="${prof.specialite}"></div>
+                    </div>
+                    <div class="carte-prof" th:each="prof : ${professeurs}">
+                        <img th:src="${prof.photoBase64 != null} ? ${prof.photoBase64} : ${prof.photoUrl}" alt="Teacher photo">
+                        <div class="nom-prof" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
+                        <div class="specialite-prof" th:text="${prof.specialite}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pied-page">
+    <div class="liens-pied">
+        <a th:href="@{/accueil}">Home</a>
+        <a th:href="@{/mes-notes}">My Grades</a>
+        <a th:href="@{/profil}">My Profile</a>
+    </div>
+    <p>ðŸŽ“ EduTrack â€” Academic Tracking Platform Â· contact@edutrack.demo</p>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var sgpaData = /*[[${sgpaParSemestre}]]*/ {};
+    /*]]>*/
+    var labels = Object.keys(sgpaData).map(function(s) { return "Semester " + s; });
+    var valeurs = Object.values(sgpaData);
+    new Chart(document.getElementById('graphiqueResultats'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'SGPA (out of 10)',
+                data: valeurs,
+                backgroundColor: '#1e3a5f',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true, max: 10 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('menuProfil');
+        if (!e.target.closest('.droite')) {
+            menu.classList.remove('ouvert');
+        }
+    });
+</script>
+<script>try{if(sessionStorage.getItem('popupVu')){document.getElementById('fondPopup').style.display='none';}else{sessionStorage.setItem('popupVu','1');}}catch(e){}</script></body>
+</html>

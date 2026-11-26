@@ -1,0 +1,353 @@
+﻿
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/edutrack.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des annonces - EduTrack</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f0f1ed;
+            color: #333;
+        }
+
+        .barre-haut {
+            background: #1e3a5f;
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .titre {
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .navigation {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .navigation a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .navigation a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-deconnexion {
+            background: #b91c1c;
+            color: white;
+            border: none;
+            padding: 9px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .page {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .entete-page {
+            margin-bottom: 25px;
+        }
+
+        .entete-page h1 {
+            color: #1e3a5f;
+            margin-bottom: 8px;
+        }
+
+        .entete-page p {
+            color: #666;
+        }
+
+        .carte {
+            background: white;
+            border-top: 4px solid #d4af37;
+            border-radius: 5px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .carte h2 {
+            color: #1e3a5f;
+            font-size: 19px;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 130px;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #1e3a5f;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .btn-principal {
+            margin-top: 15px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .btn-principal:hover {
+            background: #14263f;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .succes {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .erreur {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .annonce {
+            border: 1px solid #e5e7eb;
+            border-left: 4px solid #1e3a5f;
+            padding: 18px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            background: #fff;
+        }
+
+        .annonce-date {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .annonce-contenu {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-modifier {
+            background: #e0eaf5;
+            color: #1e3a5f;
+            border: none;
+            padding: 8px 13px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .btn-supprimer {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 8px 13px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .vide {
+            text-align: center;
+            padding: 35px;
+            color: #777;
+        }
+
+        @media (max-width: 600px) {
+            .barre-haut {
+                padding: 18px;
+            }
+
+            .page {
+                margin-top: 20px;
+                padding: 0 12px;
+            }
+
+            .carte {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="barre-haut">
+    <div class="titre">EduTrack | Administration</div>
+
+    <nav class="navigation">
+        <a href="/admin/notes">Gestion des notes</a>
+        <a href="/admin/annonces">Annonces</a>
+        <a href="/profil">Mon profil</a>
+
+        <form th:action="@{/deconnexion}" method="post">
+            <button class="btn-deconnexion" type="submit">
+                DÃ©connexion
+            </button>
+        </form>
+    </nav>
+</header>
+
+<main class="page">
+
+    <div class="entete-page">
+        <h1>Gestion des annonces</h1>
+        <p>Publiez et gÃ©rez les informations destinÃ©es aux Ã©tudiants.</p>
+    </div>
+
+    <div th:if="${succesMessage}"
+         class="message succes"
+         th:text="${succesMessage}">
+    </div>
+
+    <div th:if="${erreur}"
+         class="message erreur"
+         th:text="${erreur}">
+    </div>
+
+    <!-- FORMULAIRE DE MODIFICATION -->
+    <section class="carte" th:if="${annonceAModifier != null}">
+        <h2>Modifier une annonce</h2>
+
+        <form th:action="@{'/admin/annonces/' + ${annonceAModifier.id} + '/modifier'}"
+              method="post">
+
+            <label for="contenuModification">Contenu de l'annonce</label>
+
+            <textarea id="contenuModification"
+                      name="contenu"
+                      maxlength="1000"
+                      required
+                      th:text="${annonceAModifier.contenu}"></textarea>
+
+            <button type="submit" class="btn-principal">
+                Enregistrer les modifications
+            </button>
+
+            <a href="/admin/annonces"
+               style="margin-left:12px;color:#1e3a5f;">
+                Annuler
+            </a>
+        </form>
+    </section>
+
+    <!-- FORMULAIRE DE PUBLICATION -->
+    <section class="carte" th:unless="${annonceAModifier != null}">
+        <h2>Publier une nouvelle annonce</h2>
+
+        <form th:action="@{/admin/annonces/ajouter}" method="post">
+
+            <label for="contenu">Contenu de l'annonce</label>
+
+            <textarea id="contenu"
+                      name="contenu"
+                      maxlength="1000"
+                      placeholder="Ã‰crivez votre annonce ici..."
+                      required></textarea>
+
+            <button type="submit" class="btn-principal">
+                Publier l'annonce
+            </button>
+        </form>
+    </section>
+
+    <!-- LISTE DES ANNONCES -->
+    <section class="carte">
+        <h2>
+            Annonces publiÃ©es
+            (<span th:text="${#lists.size(annonces)}">0</span>)
+        </h2>
+
+        <div th:if="${#lists.isEmpty(annonces)}" class="vide">
+            <p>Aucune annonce publiÃ©e pour le moment.</p>
+        </div>
+
+        <article class="annonce" th:each="annonce : ${annonces}">
+
+            <div class="annonce-date">
+                PubliÃ©e le :
+                <span th:text="${annonce.date}"></span>
+            </div>
+
+            <div class="annonce-contenu"
+                 th:text="${annonce.contenu}">
+            </div>
+
+            <div class="actions">
+
+                <a th:href="@{/admin/annonces(modifier=${annonce.id})}">
+                    <button type="button" class="btn-modifier">
+                        Modifier
+                    </button>
+                </a>
+
+                <form th:action="@{'/admin/annonces/' + ${annonce.id} + '/supprimer'}"
+                      method="post"
+                      onsubmit="return confirm('Voulez-vous vraiment supprimer cette annonce ?');">
+
+                    <button type="submit" class="btn-supprimer">
+                        Supprimer
+                    </button>
+                </form>
+
+            </div>
+        </article>
+
+    </section>
+
+</main>
+
+</body>
+</html>
+

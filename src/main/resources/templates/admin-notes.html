@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" th:href="@{/css/edutrack.css}">
     <meta charset="UTF-8">
     <title>Admin Panel - EduTrack</title>
     <style>
@@ -147,9 +148,9 @@
 <body>
 
 <div class="barre-haut">
-    <div class="titre">🎓 EduTrack — Admin Panel</div>
+    <div class="titre">ðŸŽ“ EduTrack â€” Admin Panel</div>
     <div class="droite">
-        <a href="/admin/professeurs" style="color:#fff;font-weight:600;text-decoration:none;">Faculty photos</a><a href="/profil" style="color:#fff;font-weight:600;text-decoration:none;">My profile</a><span th:text="${email}"></span>
+        <a href="/admin/professeurs" style="color:#fff;font-weight:600;text-decoration:none;">Faculty photos</a><a href="/profil" style="color:#fff;font-weight:600;text-decoration:none;">My profile</a><a href="/admin/nouveaux-eleves" style="color:#fff;font-weight:600;text-decoration:none;">New students</a><span th:text="${email}"></span>
         <form th:action="@{/deconnexion}" method="post" style="margin:0;">
             <button type="submit" class="btn-deconnexion">Log out</button>
         </form>
@@ -177,7 +178,7 @@
     </div>
 
     <div class="carte">
-        <div class="entete"><h1>🏆 Top 5 Students</h1></div>
+        <div class="entete"><h1>ðŸ† Top 5 Students</h1></div>
         <div class="corps">
             <div class="tableau-scroll" style="max-height: none;">
                 <table>
@@ -204,7 +205,7 @@
 
     <div class="listes">
         <div class="carte">
-            <div class="entete"><h1>👥 Students (<span th:text="${#lists.size(eleves)}"></span>)</h1></div>
+            <div class="entete"><h1>ðŸ‘¥ Students (<span th:text="${#lists.size(eleves)}"></span>)</h1></div>
             <div class="corps">
                 <input type="text" class="recherche" placeholder="Search a student..." onkeyup="filtrer(this, 'table-eleves')">
                 <div class="tableau-scroll">
@@ -232,7 +233,7 @@
             </div>
         </div>
         <div class="carte">
-            <div class="entete"><h1>📚 Subjects (<span th:text="${#lists.size(matieres)}"></span>)</h1></div>
+            <div class="entete"><h1>ðŸ“š Subjects (<span th:text="${#lists.size(matieres)}"></span>)</h1></div>
             <div class="corps">
                 <input type="text" class="recherche" placeholder="Search a subject..." onkeyup="filtrer(this, 'table-matieres')">
                 <div class="tableau-scroll">
@@ -253,7 +254,7 @@
     </div>
 
     <div class="carte">
-        <div class="entete"><h1>📊 Recorded Grades (<span th:text="${#lists.size(notes)}"></span>)</h1></div>
+        <div class="entete"><h1>ðŸ“Š Recorded Grades (<span th:text="${#lists.size(notes)}"></span>)</h1></div>
         <div class="corps">
             <input type="text" class="recherche" placeholder="Search a grade (student, subject)..." onkeyup="filtrer(this, 'table-notes')">
             <div class="tableau-scroll">
@@ -290,7 +291,7 @@
 
     <div class="carte" style="max-width: 480px; margin: 0 auto; width: 100%;">
         <div class="entete">
-            <h1>📝 Add a Grade</h1>
+            <h1>ðŸ“ Add a Grade</h1>
         </div>
         <div class="corps">
             <p class="info" th:if="${param.succes}">Grade added successfully!</p>

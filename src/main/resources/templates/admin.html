@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" th:href="@{/css/edutrack.css}">
     <meta charset="UTF-8">
     <title>Administration</title>
     <style>
@@ -69,19 +70,19 @@
 <body>
 <div class="carte">
     <div class="entete">
-        <div class="icone">🔐</div>
+        <div class="icone">ðŸ”</div>
         <h1>Espace Administrateur</h1>
         <p th:text="${email}"></p>
     </div>
     <div class="corps">
         <a th:href="@{/admin/notes}" class="lien-carte">
-            <span class="emoji">📝</span> Gérer les notes
+            <span class="emoji">ðŸ“</span> GÃ©rer les notes
         </a>
 
-        <a th:href="@{/accueil}" class="retour">← Retour à l'accueil</a>
+        <a th:href="@{/accueil}" class="retour">â† Retour Ã  l'accueil</a>
 
         <form th:action="@{/deconnexion}" method="post">
-            <button type="submit">Se déconnecter</button>
+            <button type="submit">Se dÃ©connecter</button>
         </form>
     </div>
 </div>

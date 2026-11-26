@@ -1,0 +1,250 @@
+﻿:root {
+    --navy: #102A43;
+    --navy-light: #183B56;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --background: #F4F7FB;
+    --white: #FFFFFF;
+    --text: #243447;
+    --muted: #718096;
+    --border: #E2E8F0;
+    --green: #16A34A;
+    --red: #DC2626;
+    --radius: 14px;
+    --shadow: 0 5px 20px rgba(16,42,67,.07);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+h1 {
+    font-size: 28px;
+}
+
+a {
+    color: var(--blue);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--navy);
+}
+
+/* Navigation */
+nav, .sidebar, aside, .navbar {
+    color: white;
+}
+
+.sidebar {
+    background: var(--navy);
+    min-height: 100vh;
+}
+
+.sidebar a, nav a, .navbar a {
+    transition: .2s ease;
+}
+
+.sidebar a {
+    color: #E5EDF5;
+    display: block;
+    padding: 11px 16px;
+    border-radius: 9px;
+}
+
+.sidebar a:hover {
+    background: var(--navy-light);
+    color: white;
+}
+
+/* Contenu */
+main, .container, .content, .main-content {
+    max-width: 100%;
+}
+
+.container {
+    padding-top: 24px;
+    padding-bottom: 30px;
+}
+
+section, .card, .stat-card, .dashboard-card {
+    border-radius: var(--radius);
+}
+
+.card, .stat-card, .dashboard-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 18px;
+}
+
+/* Boutons */
+button, .btn, input[type="submit"] {
+    border: none;
+    border-radius: 9px;
+    padding: 10px 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.btn-primary, button[type="submit"],
+input[type="submit"] {
+    background: var(--blue);
+    color: white;
+}
+
+.btn-primary:hover, button[type="submit"]:hover {
+    background: var(--navy);
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: var(--green);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--red);
+    color: white;
+}
+
+.btn-secondary {
+    background: #E8EEF5;
+    color: var(--navy);
+}
+
+/* Tableaux modernes */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius);
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+thead th {
+    background: #EFF4FA;
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    padding: 15px 16px;
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: 14px 16px;
+    border-top: 1px solid #EDF1F5;
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background: #F7FAFE;
+}
+
+td img {
+    width: 42px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 50%;
+    vertical-align: middle;
+    border: 2px solid #E6EDF5;
+}
+
+/* Formulaires */
+input:not([type="checkbox"]):not([type="radio"]),
+select, textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #D5DFEA;
+    border-radius: 9px;
+    background: white;
+    color: var(--text);
+    outline: none;
+    margin-top: 5px;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+/* Images et en-tetes */
+img {
+    max-width: 100%;
+}
+
+header {
+    border-radius: var(--radius);
+}
+
+.page-header, .dashboard-header {
+    margin-bottom: 24px;
+}
+
+.page-header p, .dashboard-header p {
+    color: var(--muted);
+}
+
+/* Etiquettes de statut */
+.badge, .status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Adaptation mobile */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    .container {
+        padding: 14px;
+    }
+
+    .card, .stat-card, .dashboard-card {
+        padding: 15px;
+    }
+
+    table {
+        min-width: 650px;
+    }
+
+    button, .btn {
+        margin-bottom: 5px;
+    }
+}
