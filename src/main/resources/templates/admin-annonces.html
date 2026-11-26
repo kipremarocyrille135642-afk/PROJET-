@@ -1,11 +1,11 @@
-﻿
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/css/edutrack.css}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des annonces - EduTrack</title>
+    <title>Announcement management - EduTrack</title>
 
     <style>
         * {
@@ -224,11 +224,11 @@
 <body>
 
 <header class="barre-haut">
-    <div class="titre">EduTrack | Administration</div>
+    <div class="titre">EduTrack | Admin Panel</div>
 
     <nav class="navigation">
         <a href="/admin/notes">Gestion des notes</a>
-        <a href="/admin/annonces">Annonces</a>
+        <a href="/admin/annonces">Announcements</a>
         <a href="/profil">Mon profil</a>
 
         <form th:action="@{/deconnexion}" method="post">
@@ -242,7 +242,7 @@
 <main class="page">
 
     <div class="entete-page">
-        <h1>Gestion des annonces</h1>
+        <h1>Announcement management</h1>
         <p>Publiez et gÃ©rez les informations destinÃ©es aux Ã©tudiants.</p>
     </div>
 
@@ -258,12 +258,12 @@
 
     <!-- FORMULAIRE DE MODIFICATION -->
     <section class="carte" th:if="${annonceAModifier != null}">
-        <h2>Modifier une annonce</h2>
+        <h2>Edit announcement</h2>
 
         <form th:action="@{'/admin/annonces/' + ${annonceAModifier.id} + '/modifier'}"
               method="post">
 
-            <label for="contenuModification">Contenu de l'annonce</label>
+            <label for="contenuModification">Announcement content</label>
 
             <textarea id="contenuModification"
                       name="contenu"
@@ -272,23 +272,23 @@
                       th:text="${annonceAModifier.contenu}"></textarea>
 
             <button type="submit" class="btn-principal">
-                Enregistrer les modifications
+                Save changes
             </button>
 
             <a href="/admin/annonces"
                style="margin-left:12px;color:#1e3a5f;">
-                Annuler
+                Cancel
             </a>
         </form>
     </section>
 
     <!-- FORMULAIRE DE PUBLICATION -->
     <section class="carte" th:unless="${annonceAModifier != null}">
-        <h2>Publier une nouvelle annonce</h2>
+        <h2>Publish a new announcement</h2>
 
         <form th:action="@{/admin/annonces/ajouter}" method="post">
 
-            <label for="contenu">Contenu de l'annonce</label>
+            <label for="contenu">Announcement content</label>
 
             <textarea id="contenu"
                       name="contenu"
@@ -297,7 +297,7 @@
                       required></textarea>
 
             <button type="submit" class="btn-principal">
-                Publier l'annonce
+                Publish announcement
             </button>
         </form>
     </section>
@@ -328,16 +328,16 @@
 
                 <a th:href="@{/admin/annonces(modifier=${annonce.id})}">
                     <button type="button" class="btn-modifier">
-                        Modifier
+                        Edit
                     </button>
                 </a>
 
                 <form th:action="@{'/admin/annonces/' + ${annonce.id} + '/supprimer'}"
                       method="post"
-                      onsubmit="return confirm('Voulez-vous vraiment supprimer cette annonce ?');">
+                      onsubmit="return confirm('Do you really want to delete this announcement?');">
 
                     <button type="submit" class="btn-supprimer">
-                        Supprimer
+                        Delete
                     </button>
                 </form>
 

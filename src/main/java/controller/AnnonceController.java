@@ -39,7 +39,7 @@ public class AnnonceController {
                                  RedirectAttributes redirectAttributes) {
         if (contenu == null || contenu.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute(
-                    "erreur", "Le contenu de l'annonce est obligatoire.");
+                    "erreur", "Announcement content is required.");
             return "redirect:/admin/annonces";
         }
 
@@ -57,7 +57,7 @@ public class AnnonceController {
                                   RedirectAttributes redirectAttributes) {
         Annonce annonce = annonceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Annonce introuvable."));
+                        "Announcement not found."));
 
         if (contenu == null || contenu.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute(
@@ -79,7 +79,7 @@ public class AnnonceController {
                                    RedirectAttributes redirectAttributes) {
         if (!annonceRepository.existsById(id)) {
             redirectAttributes.addFlashAttribute(
-                    "erreur", "Annonce introuvable.");
+                    "erreur", "Announcement not found.");
             return "redirect:/admin/annonces";
         }
 
