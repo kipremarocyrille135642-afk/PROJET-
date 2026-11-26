@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <link rel="stylesheet" th:href="@{/css/edutrack.css}">
@@ -54,8 +54,8 @@
             <div class="nom" th:text="${prof.prenom} + ' ' + ${prof.nom}"></div>
             <div class="spec" th:text="${prof.specialite}"></div>
             <form th:action="@{'/admin/professeurs/' + ${prof.id} + '/photo'}" method="post" enctype="multipart/form-data">
-                <input type="file" name="photo" accept="image/*" required>
-                <button type="submit">Upload photo</button>
+                <input type="file" name="photo" accept="image/*" required style="display:none" onchange="this.form.submit()">
+                <label class="choisir" onclick="this.parentNode.querySelector('input[type=file]').click()" style="display:block;margin-top:0.7rem;width:100%;box-sizing:border-box;text-align:center;padding:0.65rem;border-radius:10px;background:var(--bleu);color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;">Upload photo</label>
             </form>
             <form th:if="${prof.photoBase64 != null}" th:action="@{'/admin/professeurs/' + ${prof.id} + '/photo/supprimer'}" method="post"
                   onsubmit="return confirm('Remove this photo?');">
