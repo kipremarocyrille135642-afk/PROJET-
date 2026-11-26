@@ -66,6 +66,8 @@ public class DataLoader implements CommandLineRunner {
         {"exemple.ndri@demo.ci", "Ndri", "Nadege"}
     };
 
+    private static final String[][] ELEVES_INDIENS = { {"aarav.sharma@demo.ci","Sharma","Aarav","Aarav@2026"}, {"diya.patel@demo.ci","Patel","Diya","Diya@2026"}, {"rohan.mehta@demo.ci","Mehta","Rohan","Rohan@2026"}, {"ananya.reddy@demo.ci","Reddy","Ananya","Ananya@2026"}, {"karthik.nair@demo.ci","Nair","Karthik","Karthik@2026"} };
+
     @Override
     public void run(String... args) throws Exception {
         if (faculteRepository.count() == 0) {
@@ -82,6 +84,7 @@ public class DataLoader implements CommandLineRunner {
             creerAdmin();
         }
 
+        for (String[] e : ELEVES_INDIENS) { if (!utilisateurRepository.existsByEmail(e[0])) { Utilisateur u = new Utilisateur(); u.setEmail(e[0]); u.setNom(e[1]); u.setPrenom(e[2]); u.setMotDePasse(passwordEncoder.encode(e[3])); utilisateurRepository.save(u); } }
         if (professeurRepository.count() == 0) { creerProfesseurs(); }
 
         if (annonceRepository.count() == 0) {
