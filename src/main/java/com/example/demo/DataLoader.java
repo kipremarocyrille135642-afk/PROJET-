@@ -88,7 +88,7 @@ public class DataLoader implements CommandLineRunner {
         }
 
         for (String[] e : ELEVES_INDIENS) { if (!utilisateurRepository.existsByEmail(e[0])) { Utilisateur u = new Utilisateur(); u.setEmail(e[0]); u.setNom(e[1]); u.setPrenom(e[2]); u.setMotDePasse(passwordEncoder.encode(e[3])); utilisateurRepository.save(u); } }
-        for (String[] e : ELEVES_INDIENS) { if (!nouvelEleveRepository.existsByEmail(e[0])) { com.example.demo.entity.NouvelEleve n = new com.example.demo.entity.NouvelEleve(); n.setEmail(e[0]); n.setNom(e[1]); n.setPrenom(e[2]); n.setFiliere("BCA"); n.setSemestre(1); n.setStatut("Accepted"); nouvelEleveRepository.save(n); } }
+        for (String[] e : ELEVES_INDIENS) { if (!nouvelEleveRepository.existsByEmail(e[0])) { com.example.demo.entity.NouvelEleve n = new com.example.demo.entity.NouvelEleve(); n.setEmail(e[0]); n.setNom(e[1]); n.setPrenom(e[2]); n.setFiliere("BCA"); n.setSemestre(1); n.setStatut("Accepted"); n.setDateInscription(java.time.LocalDate.now()); nouvelEleveRepository.save(n); } }
         if (professeurRepository.count() == 0) { creerProfesseurs(); }
 
         if (annonceRepository.count() == 0) {
