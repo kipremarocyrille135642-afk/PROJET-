@@ -46,7 +46,7 @@ public class AnnonceController {
         annonceRepository.save(new Annonce(contenu.trim()));
 
         redirectAttributes.addFlashAttribute(
-                "succesMessage", "Annonce publiée avec succès !");
+                "succesMessage", "Announcement published successfully!");
 
         return "redirect:/admin/annonces";
     }
@@ -61,7 +61,7 @@ public class AnnonceController {
 
         if (contenu == null || contenu.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute(
-                    "erreur", "Le contenu ne peut pas être vide.");
+                    "erreur", "Content cannot be empty.");
             return "redirect:/admin/annonces";
         }
 
@@ -69,7 +69,7 @@ public class AnnonceController {
         annonceRepository.save(annonce);
 
         redirectAttributes.addFlashAttribute(
-                "succesMessage", "Annonce modifiée avec succès !");
+                "succesMessage", "Announcement updated successfully!");
 
         return "redirect:/admin/annonces";
     }
@@ -86,7 +86,7 @@ public class AnnonceController {
         annonceRepository.deleteById(id);
 
         redirectAttributes.addFlashAttribute(
-                "succesMessage", "Annonce supprimée avec succès !");
+                "succesMessage", "Announcement deleted successfully!");
 
         return "redirect:/admin/annonces";
     }
